@@ -37,7 +37,10 @@ The lab takes place in three stages.
 
 # The Data
 
-The data is provided in a file within this repository.  Majid Maki-Nayeri compiled the data, drawing many variables from the COVID-19 US state policy database (Raifman J, Nocka K, Jones D, Bor J, Lipson S, Jay J, and Chan P.). Supporting documents like the specific legal language used by states, additional data sources, and much more are available in unstructured format [here](https://tinyurl.com/statepolicysources).
+The data is provided in a file within this repository.  Majid Maki-Nayeri compiled the data, drawing many variables from the COVID-19 US state policy database (Raifman J, Nocka K, Jones D, Bor J, Lipson S, Jay J, and Chan P.).
+
+- The data is available [here](https://mids-w203.s3-us-west-1.amazonaws.com/covid-19_dist0720+.xlsx). 
+- Supporting documents like the specific legal language used by states, additional data sources, and much more are available in unstructured format [here](https://tinyurl.com/statepolicysources).
 
 The dataset includes: 
 
