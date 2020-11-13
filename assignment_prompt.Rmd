@@ -31,7 +31,13 @@ This is a group assignment.  Your live session instructor will coordinate the fo
 
 # The Data
 
-The data is provided in a file within this repository.  Majid Maki-Nayeri compiled the data, drawing many variables from the COVID-19 US state policy database (Raifman J, Nocka K, Jones D, Bor J, Lipson S, Jay J, and Chan P.). Supporting documents like the specific legal language used by states, additional data sources, and much more are available in unstructured format [here](https://tinyurl.com/statepolicysources).
+The data is provided in a file in the following links:
+
+- [here](https://mids-w203.s3-us-west-1.amazonaws.com/2020-10-23_US_Mobility_Report_en.pdf) A Google Dataset about Individual Mobility
+- [here](https://mids-w203.s3-us-west-1.amazonaws.com/COVID-19+US+state+policy+database+(CUSP).xlsx) A state policy database about opening, reopening, and reclosing. 
+- [here](https://s3.console.aws.amazon.com/s3/object/mids-w203?region=us-west-1&prefix=covid-19.xlsx) A datset of COVID cases. 
+
+- Majid Maki-Nayeri compiled the data, drawing many variables from the COVID-19 US state policy database (Raifman J, Nocka K, Jones D, Bor J, Lipson S, Jay J, and Chan P.). Supporting documents like the specific legal language used by states, additional data sources, and much more are available in unstructured format [here](https://tinyurl.com/statepolicysources).
 
 The dataset includes: 
 
