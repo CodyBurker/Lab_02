@@ -19,14 +19,10 @@ Project Organization
     ├── references         <- Data dictionaries, manuals, and all other explanatory materials.
     │
     ├── reports            <- Generated analysis as HTML, PDF, LaTeX, etc.
-    │   └── figures        <- Generated graphics and figures to be used in reporting
     │
     └── src                <- Source code for use in this project.
         │
         └── data           <- Scripts to download or generate data
-           └── make_dataset.R
-
-
 --------
 
-<p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
+Repository structured based on [cookiecutter data science](https://drivendata.github.io/cookiecutter-data-science).

@@ -1,0 +1,155 @@
+---
+title: "Lab 2: Regression to Study the Spread of Covid-19"
+author: 'w203: Statistics for Data Science'
+date: "10/28/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+
+In this lab, you will apply what you are learning about linear regression to study the spread of COVID-19. Your task is to select a research question, then conduct a regression study to analyze it. 
+
+Your research question must focus attention on a specific measurement goal. It is not enough to say "we are looking for policies that help stop COVID-19" (That would be a fishing expedition). Instead, use your introduction to motivate a specific effect for measurement. 
+
+Once you have a measurement goal, you will build a set of linear models that are tailored to that goal, and display them in a well formatted regression table. You will finally use your conclusion to distill insights from your estimates.
+
+This is a group assignment. Your live session instructor will coordinate the formation of groups. We would like to encourage teams to focus on using the lab as a way to learn how to work as a team of collaborating data scientists on shared code; how to clean and organize data; and, how to present work in a compelling way. As a result, we encourage teams to allow individuals to take risks and be supportive in the face of successes and failures. Create an opportunity for people who want to improve a particular skill to do so -- this might be project coordination, management of code through git, plotting, or any of the many aspects that you'll work on. *We hope that you can support and learn from one another through this team-based project.* 
+
+# Deliverables 
+
+| Deliverable Name       | Week Due | Grade Weight |
+|------------------------|----------|--------------| 
+| [Research Proposal]    | Week 12  | 10%          | 
+| [Within-Team Review]   | Week 12  | 5%           | 
+| [Final Presentation]   | Week 14  | 10%          | 
+| [Final Report]         | Week 14  | 75%          | 
+
+
+# Data
+
+We recommend the following data sources:
+
+- [COVID-19 US State Policy Database](www.tinyurl.com/statepolicies) A database of state policy responses to the pandemic, compiled by researchers at the Boston University School of Public Health.
+- [COVID-19 Community Mobility Report](https://www.google.com/covid19/mobility/) A Google dataset that includes state-level measurements of individual mobility
+- [The American Community Survey](https://data.census.gov/cedsci/table?q=ACS&g=0100000US.04000.001&tid=ACSDP1Y2019.DP05&moe=false&hidePreview=true) A product from the US Census Bureau that contains state-level demographics and other indicators of general interest.
+
+If you want to, you are allowed to add extra variables from other sources. However, this is not necessary, and we will not assign any bonus points to teams that derive unique data, as our focus is on statistics and statistical writing.
+
+All data must be compiled into state-by-state metrics for regression analysis.
+
+# Final Project Components {.tabset}
+
+## Research Proposal
+
+After a week of work, the project team will produce a one page research-proposal that defines a research question, data sources, and a plan of action. 
+
+The research question should be informed by an understanding of the datasets that are available, and the variables that are available in those data sets. The team will need to do enough preliminary work to assess whether their research question is feasible. A motivated team might form their research question, and begin to build a functioning data pipeline as an investment in ongoing project success. This proposal is intended to provide a structure for the team to have early conversations; it will be graded credit/no credit for completeness (i.e. a reasonable effort by the team will receive full marks). 
+
+**This proposal is due in week 12. Only one submission per team is required.**
+
+## Within-Team Review
+
+Being an effective, supportive team member is a crucial part of data science work. Your performance on this lab includes the role you play in supporting your teammates. This includes being responsive, creating an environment in which all members feel included, and above all treating each other with respect. In line with this perspective, we will ask each team member to write to two paragraphs to their instructor about the progress they have made individually, and the team has made as a whole toward completing their report. This self-assessment should: 
+
+- Reflect on the strengths and weaknesses of the team and the team's process. Where your collaboration has worked well, how will you work to ensure that these successful practices continue to be employed? If there are places where collaboration has been challenging, what can the team do jointly to improve? 
+- If there are any individual performances that deserve special recognition, please let me know in this evaluation. As well, if there are any individual performances that require special attention, please also let me know. I will treat these reviews as confidential and will not take any action without first consulting you.
+
+**This reflection is due in week 13, and requires one submission per person.** You will submit this through Gradescope, and like all parts of your educational record, this will be treated confidentially by the instructional team. 
+
+## Final Presentation 
+
+During the Unit 14 live session, each team will give a slide presentation of their work to their classmates -- i.e. collaborating data scientists. This audience is generally aware of the project that you're working on, but they will need to be reminded of the specific research question that you are addressing. 
+**The presentation should be structured as 10 minutes of presentation and 5 minutes of questions from our classmates.** We'd like to note that this is an *incredibly* limited amount of time to present. The materials that you present should reflect these serious constraints! 
+
+1. There should be no more than two slides -- probably one is best -- that set-up your research problem and these slides should take no more than two minutes to present. (1 minute)
+2. There should be at least one, and not more than two, slides that describe the variables that you're using in your models. These slides should cover the important features of the variables that you're using: how are they are measured, the unit of observation, plots of how these variables are distributed, and why this *particular* variable appropriate to use to answer your research question. (3 minutes) 
+   - Do not present R code, discuss data wrangling, or normality - details like this are best left to the full analysis. 
+
+3. There should then be several slides that provide what you've learned from your models. If you show model results, you need to provide your audience with enough time to read and engage with these models; not flash past them. Any model you show will take at least one minute to talk about. 
+
+Finally, a few more general thoughts: 
+
+- Practice your talk with a timer. We're going to be strict and end your talk 10 minutes in -- we have a mute button! :joy:
+- If you divide your talk with your teammates, practice your section with a timer so that you do not spill over into your teammates' time.
+- We *strongly* recommend having no more than 5 or maybe 6 slides total.
+
+## Final Report
+
+Your final deliverable is a written statistical analysis documenting your findings. Please limit your submission to 8000 words, excluding code cells and R output.
+
+The exact format of your report is flexible, but it should include the following elements.
+
+### 1. An Introduction
+
+Your introduction should present a research question and explain the concept that you're attempting to measure and how it will be operationalized. This section should pave the way for the body of the report, preparing the reader to understand why the models are constructed the way that they are. It is not enough to simply say "We are looking for policies that help against COVID."  Your introduction must do work for you, focusing the reader on a specific measurement goal, making them care about it, and propelling the narrative forward. This is also good time to put your work into context, discuss cross-cutting issues, and assess the overall appropriateness of the data.
+
+### 2. A Model Building Process
+
+You will next build a set of models to investigate your research question, documenting your decisions. Here are some things to keep in mind during your model building process:
+
+1. *What do you want to measure*? Make sure you identify one key variable (possibly more in rare cases) that will allow you to derive conclusions relevant to your research question, and include this variables in all model specifications.
+2. Is your modeling goal one of description or explanation? 
+3. What [covariates](https://en.wikipedia.org/wiki/Dependent_and_independent_variables#Statistics_synonyms) help you achieve your modeling goals? What covariates are problematic, either due to *collinearity*, or because they will absorb some of a causal effect you want to measure?
+4. What *transformations*, if any, should you apply to each variable? These transformations might reveal linearities in the data, make your results relevant, or help you meet model assumptions.
+5. Are your choices supported by exploratory data analysis (*EDA*)? You will likely start with some general EDA to *detect anomalies* (missing values, top-coded variables, etc.). From then on, your EDA should be interspersed with your model building. Use visual tools to *guide* your decisions. You can also leverage statistical *tests* to help assess whether variables, or groups of variables, are improving model fit.
+
+At the same time, it is important to remember that you are not trying to create one perfect model. You will create several specifications, giving the reader a sense of how robust (or sensitive) your results are to modeling choices, and to show that you're not just cherry-picking the specification that leads to the largest effects.
+
+At a minimum, you should include the following three specifications:
+
+1. **Limited Model**: A model that includes *only the key variable* you want to measure and nothing (or almost nothing) else. This variables might be transformed, as determined by your EDA, but the model should include the absolute minimum number of covariates (perhaps one, or at most two-three, covariates if they are so crucial that it would be unreasonable to omit them). 
+1. **Model Two**: A model that includes *key explanatory variables and covariates that you believe advance your modeling* goals without introducing too much multicollinearity or causing other issues. This model should strike a balance between accuracy and parsimony and reflect your best understanding of the relationships among key variables.
+1. **Model Three**: A model that includes the *previous covariates, and many other covariates*, erring on the side of inclusion. A key purpose of this model is to evaluate how parameters of interest change (if at all) when additional, potentially colinear variables are included in the model specification.
+
+Although the models have different emphases, each one must still be a reasonable choice given your modeling goals.  The idea is to choose models that encircle the space of reasonable modeling choices, and to give an overall understanding of how these choices impact results.
+
+### 3. A Regression Table
+
+You should display all of your model specifications in a regression table, using a package like [`stargazer`](https://cran.r-project.org/web/packages/stargazer/vignettes/stargazer.pdf) to format your output. It should be easy for the reader to find the coefficients that represent key effects at the top of the regression table, and scan horizontally to see how they change from specification to specification. Make sure that you display the most appropriate standard errors in your table, along with significance stars.
+
+In your text, comment on both *statistical significance and practical significance*. You may want to include statistical tests besides the standard t-tests for regression coefficients.
+
+### 4. Limitations of your Model 
+
+As a team, evaluate all of the CLM assumptions that must hold for your model. However, do not report an exhaustive examination all 5 CLM assumption. Instead, bring forward only those assumptions that you think pose significant problems for your analysis. For each problem that you identify, describe the statistical consequences. If you are able to identify any strategies to mitigate the consequences, explain these strategies. 
+
+Note that you may need to change your model specifications in response to violations of the CLM. 
+
+### 5. Discussion of Omitted Variables
+
+If the team has taken up an explanatory (i.e. causal) question to evaluate, then identify what you think are the 5 most important *omitted variables* that bias results you care about. For each variable, you should *reason about the direction of bias* caused by omitting this variable. If you can argue whether the bias is large or small, that is even better. State whether you have any variables available that may proxy (even imperfectly) for the omitted variable. Pay particular attention to whether each omitted variable bias is *towards zero or away from zero*. You will use this information to judge whether the effects you find are likely to be real, or whether they might be entirely an artifact of omitted variable bias.
+
+### 6. Conclusion
+
+Make sure that you end your report with a discussion that distills key insights from your estimates and addresses your research question.
+
+## Rubric for Evaluation
+
+You may use the following, loosely structured rubric to guide your writing.
+
+- **Introduction.** Is the introduction clear? Is the research question specific and well defined? Does the introduction motivate a specific concept to be measured and explain how it will be operationalized. Does it do a good job of preparing the reader to understand the model specifications?
+
+- **The Initial Data Loading and Cleaning.** Did the team notice any anomalous values? Is there a sufficient justification for any data points that are removed? Did the report note any coding features that affect the meaning of variables (e.g. top-coding or bottom-coding)? Overall, does the report demonstrate a thorough understanding of the data? Does the report convey this understand to its reader -- can the reader, through reading this report, come to the same understanding that the team has come to? 
+
+- **The Model Building Process.** Overall, is each step in the model building process supported by EDA? Is the outcome variable appropriate? Did the team clearly state why they chose these explanatory variables, does this explanation make sense in term of their research question? Did the team consider available variable transformations and select them with an eye towards model plausibility and interpretability? Are transformations used to expose linear relationships in scatterplots? Is there enough explanation in the text to understand the meaning of each visualization?
+
+- **Regression Models:**
+   - **Base Model.** Does this model only include key explanatory variables? Do the variables make sense given the measurement goals? Did the team apply reasonable transformations to these variables, to capture the nature of the relationships? Does the team write about this model in prose in a way that is appropriate? 
+   - **Second Model.** Does this model represent a balanced approach, including variables that advance modeling goals without causing major issues? Does the model succeed in reducing standard errors of the key variables compared to the base model? Does it capture major non-linearities in the joint distribution of the variables? Does the team write about this model in prose in a way that is appropriate? 
+   - **Third Model.** Does this model represent a maximalist approach, erring on the side of including most variables? Is it still a reasonable model? Are there any variables that are outcomes, and should therefore still be excluded? Is there too much colinearity, to the point that the key causal effects cannot be measured? Does this team write about this model in prose in a way that is appropriate? 
+
+- **A Regression Table.** Are the model specifications properly chosen to outline the boundary of reasonable choices? Is it easy to find key coefficients in the regression table? Does the text include a discussion of practical significance for key effects? 
+   
+- **Plots, Figures, and Tables** Do the plots, figures and tables that the team has chosen to include successfully move forward the argument that they are making? Has the team chosen the most effective method (a table or a chart) to display their evidence? Is that table or chart the most communicative it could be? Is every plot, figure, and table that is included in the report referenced in the narrative argument?
+
+- **Assessment of the CLM.** Has the team presented a sober assessment of the CLM assumptions that might be problematic for their model? Have they presented their analysis about the consequences of these problems (including random sampling) for the models they estimate? Did they use visual tools or statistical tests, as appropriate? Did they respond appropriately to any violations?
+
+- **An Omitted Variables Discussion.** Did the report miss any important sources of omitted variable bias? Are the estimated directions of bias correct? Was their explanation clear? Is the discussion connected to whether the key effects are real or whether they may be solely an artifact of omitted variable bias?
+
+- **Conclusion.** Does the conclusion address the research question? Does it raise interesting points beyond numerical estimates? Does it place relevant context around the results?
+
+- Are there any other errors, faulty logic, unclear or unpersuasive writing, or other elements that leave you less convinced by the conclusions?
