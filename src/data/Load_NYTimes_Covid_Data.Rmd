@@ -13,11 +13,20 @@ library(tidyverse)
 library(data.table)
 # Load data
 NYTimes_data <- fread("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv") %>%
-  mutate(date = as.Date(date)) %>% # Clean dates
+  mutate(date = as.Date(date),
+         fips = as.integer(fips)) %>% # Clean dates
   group_by(state) %>% # Group by state
-  summarize(fips = sum(fips),  # Summarize
+  summarize(fips = min(fips),  # Summarize
             cases = sum(cases),
-            deaths = sum(deaths))
+            deaths = sum(deaths)) %>%
+  rename(State.FIPS.Code = fips)
 
-write_csv(NYTimes_data,"src/data/NYTimes_COVID.csv",append = FALSE) # Write to disk
+write_csv(NYTimes_data, "NYTimes_COVID.csv")
+
+CUSP_Clean <- read_csv("CUSP_Clean.csv") %>%
+  mutate(State.FIPS.Code = as.integer(State.FIPS.Code))
+
+CUSP_Joined <- left_join(CUSP_Clean, 
+                         NYTimes_data,
+                         by = "State.FIPS.Code")
 ```
