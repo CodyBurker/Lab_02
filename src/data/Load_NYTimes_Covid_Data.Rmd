@@ -1,0 +1,23 @@
+---
+title: "COVID Data Chomper (CDC)"
+author: "Kevin Martin"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+This tool will grab data from the New York Times Covid case tracker dataset on github and help you chomp it up into a form that is more useful to you. Feel free to modify and supplement this file as desired. 
+## Import libraries
+```{r setup}
+## Import libraries
+library(tidyverse)
+library(data.table)
+# Load data
+NYTimes_data <- fread("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv") %>%
+  mutate(date = as.Date(date)) %>% # Clean dates
+  group_by(state) %>% # Group by state
+  summarize(fips = sum(fips),  # Summarize
+            cases = sum(cases),
+            deaths = sum(deaths))
+
+write_csv(NYTimes_data,"src/data/NYTimes_COVID.csv",append = FALSE) # Write to disk
+```
