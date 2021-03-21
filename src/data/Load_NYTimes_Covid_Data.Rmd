@@ -29,4 +29,6 @@ CUSP_Clean <- read_csv("CUSP_Clean.csv") %>%
 CUSP_Joined <- left_join(CUSP_Clean, 
                          NYTimes_data,
                          by = "State.FIPS.Code")
+
+write_csv(CUSP_Joined, "CUSP_NYTimes.csv")
 ```

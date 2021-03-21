@@ -29,6 +29,8 @@ There has been increased skepticism on the true effectiveness of restrictions in
 
 2. [The American Community Survey](https://data.census.gov/cedsci/table?q=ACS&g=0100000US.04000.001&tid=ACSDP1Y2019.DP05&moe=false&hidePreview=true) A product from the US Census Bureau that contains state-level demographics and other indicators of general interest.
 
+3. [NY Times Covid-19 Data Repository](https://github.com/nytimes/covid-19-data) A series of data files with cumulative counts of coronavirus cases in the United States, at the state and county level, over time.
+
 From data source (1), we expect to get:
   - Closure and reopenings: Start and end dates of closures of public spaces
   - Stay at home: Start and end dates of stay at home policies
@@ -38,4 +40,8 @@ From data source (1), we expect to get:
 From data source (2), we expect to get:
   - Population data in each state
 
+From data source (3) we expect to get:
+  - Covid-19 case counts by state
+
 # Methodology and Expected outcome
+We intend to use a linear model to investigate whether relationships between Covid-19 cases and the limiting measures taken by each state are related. We expect to either find or fail to find evidence that the measures have any relationship to Covid-19 cases. 
