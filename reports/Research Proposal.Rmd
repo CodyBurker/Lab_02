@@ -19,6 +19,7 @@ From this, we will be investigating the following research question:\
 
 1.  [COVID-19 US State Policy Database](www.tinyurl.com/statepolicies) A database of state policy responses to the pandemic, compiled by researchers at the Boston University School of Public Health.
 2.  [NY Times Covid-19 Data Repository](https://github.com/nytimes/covid-19-data) A series of data files with cumulative counts of coronavirus cases in the United States, at the state and county level, over time.
+2.  [Office of Personell Management](https://www.opm.gov/policy-data-oversight/pay-leave/federal-holidays/#url=2021) A list of U.S. federal holidays.
 
 From data source (1), we expect to get variables:\
 -  Closure and reopenings: Start and end dates of closures of public spaces\
@@ -27,6 +28,8 @@ From data source (1), we expect to get variables:\
 -  Population per square mile: State's population per square mile\
 From data source (2) we expect to get the variable:\
 -  Weekly COVID-19 case counts
+From data source (3) we expect to get the variable:\
+-  A list of federal holidays
 
 # Methodology and Expected outcome
 
