@@ -1,0 +1,13 @@
+---
+title: "Load Weather Data"
+output: pdf_document
+---
+
+Federal holidays from Office of Personel Management https://www.opm.gov/policy-data-oversight/pay-leave/federal-holidays/#url=2020
+
+```{r setup, include=FALSE}
+library(tidyverse)
+read_csv("OPM_Holidays.csv") %>%
+  mutate(Date = as.Date(Date, format = "%A, %B %d, %Y")) %>% # Convert date
+  write_csv("OPM_Holidays_W_Date.csv")
+``` 
