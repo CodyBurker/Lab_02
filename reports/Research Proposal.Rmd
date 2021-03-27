@@ -10,25 +10,30 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Background
 
-The COVID-19 pandemic is the first pandemic seen in a century, affecting each individual worldwide. While many countries issued lockdowns, travel quarantines, and other COVID-19 restrictions on a federal level, the US federal government placed the power with the governors to regulate the implementation of these restrictions on a state-by-state basis.   
-     
-There has been increased skepticism on the true effectiveness of restrictions in slowing down the spread of COVID-19, especially due to the amount of economic impact resulting from these procedures. Evaluating how each state's population density, lockdown procedures, vaccine distribution, and facemask policies correlates to the spread of COVID-19 within that state helps citizens understand the importance of following these policies. Understanding the effectiveness of COVID-19 restrictions in slowing the spread of the disease also helps policy makers justify the implementation of these policies to their constituents. Additionally, this information might be of interest to public health officials who are looking for best practices to contain a future pandemic or infectious disease.    
+The COVID-19 pandemic is the first pandemic seen in a century, affecting each individual worldwide. While many countries issued lockdowns, travel quarantines, and other COVID-19 restrictions on a federal level, the US federal government placed the power with the governors to regulate the implementation of these restrictions on a state-by-state basis.
+
+There has been increased skepticism on the true effectiveness of restrictions in slowing down the spread of COVID-19, especially due to the amount of economic impact resulting from these procedures. Evaluating how each state's population density, lockdown procedures, vaccine distribution, and facemask policies correlates to the spread of COVID-19 within that state helps citizens understand the importance of following these policies. Understanding the effectiveness of COVID-19 restrictions in slowing the spread of the disease also helps policy makers justify the implementation of these policies to their constituents. Additionally, this information might be of interest to public health officials who are looking for best practices to contain a future pandemic or infectious disease.
 
 # Data sources
 
-1. [COVID-19 US State Policy Database](www.tinyurl.com/statepolicies) A database of state policy responses to the pandemic, compiled by researchers at the Boston University School of Public Health. 
-2. [The American Community Survey](https://data.census.gov/cedsci/table?q=ACS&g=0100000US.04000.001&tid=ACSDP1Y2019.DP05&moe=false&hidePreview=true) A product from the US Census Bureau that contains state-level demographics and other indicators of general interest.   
-3. [NY Times Covid-19 Data Repository](https://github.com/nytimes/covid-19-data) A series of data files with cumulative counts of coronavirus cases in the United States, at the state and county level, over time.     
-    
-From data source (1), we expect to get:     
-  - Closure and reopenings: Start and end dates of closures of public spaces    
-  - Stay at home: Start and end dates of stay at home policies    
-  - Vaccine distributions: Prioritize older adults in earlier phase than essential workers    
-  - Face masks: Start and end date of face mask mandates    
-From data source (2), we expect to get:    
-  - Population data in each state   
-From data source (3) we expect to get:    
-  - Covid-19 case counts by state    
-    
+1.  [COVID-19 US State Policy Database](www.tinyurl.com/statepolicies) A database of state policy responses to the pandemic, compiled by researchers at the Boston University School of Public Health.
+2.  [The American Community Survey](https://data.census.gov/cedsci/table?q=ACS&g=0100000US.04000.001&tid=ACSDP1Y2019.DP05&moe=false&hidePreview=true) A product from the US Census Bureau that contains state-level demographics and other indicators of general interest.\
+3.  [NY Times Covid-19 Data Repository](https://github.com/nytimes/covid-19-data) A series of data files with cumulative counts of coronavirus cases in the United States, at the state and county level, over time.
+
+From data source (1), we expect to get:\
+- Closure and reopenings: Start and end dates of closures of public spaces\
+- Stay at home: Start and end dates of stay at home policies\
+- Vaccine distributions: Prioritize older adults in earlier phase than essential workers\
+- Face masks: Start and end date of face mask mandates\
+From data source (2), we expect to get:\
+- Population data in each state\
+From data source (3) we expect to get:\
+- Weekly COVID-19 case counts
+
 # Methodology and Expected outcome
-We intend to use a linear model to investigate whether relationships between Covid-19 cases and the limiting measures taken by each state are related. We expect to either find or fail to find evidence that the measures have any relationship to Covid-19 cases.    
+
+We will investigate the causal effect that various variables have on the 7-day moving average of cumulative COVID-19 cases. We will model the 7-day moving average of cumulative COVID-19 cases as a linear function of:\
+- Closure and reopenings (whether a stay-at-home order was in effect at that time in that state and how many days since it has started) \
+- When mask mandates were required (as an indicator variable, and as how many days since the mandate started)\
+- Whether the state implemented ramifications for violating stay-at-home orders\
+We will assume that these variables have no effect on COVID-19 cases, and will construct tests to investigate whether a relationship exists.
