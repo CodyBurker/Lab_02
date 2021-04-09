@@ -29,23 +29,29 @@ From data source (2) we expect to get:\
 # Methodology and Expected outcome
 
 We will investigate the causal effect that various variables have on the 7-day moving average of cumulative COVID-19 cases. We will model the 7-day moving average of cumulative COVID-19 cases as a linear function of:\
-- Closure and reopenings (whether a stay-at-home order was in effect at that time in that state and how many days since it has started) \
+- Closure and reopenings (whether a stay-at-home order was in effect at that time in that state and how many days since it has started)\
 - When mask mandates were required (as an indicator variable, and as how many days since the mandate started)\
 - Whether the state implemented legal consequences for violating stay-at-home orders\
 We will assume that these variables have no effect on COVID-19 cases, and will construct tests to investigate whether a relationship exists.
 
 # Regression Table
 
-The following is the regression table. 
+The following is the regression table.
 
 ```{r warning=TRUE, include=FALSE}
+# Run Margo's file to load models into memory:
+
 ## Set working directory to where git was cloned to
 source_file = file("~/MIDS 203/Lab_02_SSH/src/data/lab2_MJS.R")
 # Run Margo's file.
 source(source_file)
 ```
 
-```{r}
+```{r echo=FALSE, results = "asis"}
+# Assumes that the following models are in-memory:
+# model1
+# model2
+# model3
 library(stargazer)
+stargazer(model1, model2, model3, type="latex")
 ```
-
