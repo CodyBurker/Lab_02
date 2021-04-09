@@ -33,3 +33,19 @@ We will investigate the causal effect that various variables have on the 7-day m
 - When mask mandates were required (as an indicator variable, and as how many days since the mandate started)\
 - Whether the state implemented legal consequences for violating stay-at-home orders\
 We will assume that these variables have no effect on COVID-19 cases, and will construct tests to investigate whether a relationship exists.
+
+# Regression Table
+
+The following is the regression table. 
+
+```{r warning=TRUE, include=FALSE}
+## Set working directory to where git was cloned to
+source_file = file("~/MIDS 203/Lab_02_SSH/src/data/lab2_MJS.R")
+# Run Margo's file.
+source(source_file)
+```
+
+```{r}
+library(stargazer)
+```
+

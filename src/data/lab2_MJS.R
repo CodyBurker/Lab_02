@@ -4,7 +4,8 @@ library(data.table)
 library(lmtest)
 library(lubridate)
 # Load data
-setwd("~/W203/Assignments_MJS/Lab 2/data")
+# setwd("~/W203/Assignments_MJS/Lab 2/data")
+setwd("/home/rstudio/MIDS 203/Lab_02_SSH/src/data")
 #table <- read_csv("CUSP_NYTimes.csv")
 
 # COVID policies
@@ -137,12 +138,10 @@ hist(table3_winterOnly$stateOfEmergencySpeed)
 hist(log(table3_winterOnly$restaurantsLength))
 
 model2 = lm(formula = inc_cases_log ~ Population_density_log + 
-              restaurantsLength +
-              gymsLength +
               businessFMLength + 
               quarantineTravelersLength +
-              schoolLength +
-              barsLength,
+              schoolLength + 
+              stayAtHomeLength,
             data = table3_winterOnly)
 summary(model2)
 
