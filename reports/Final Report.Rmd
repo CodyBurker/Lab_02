@@ -81,6 +81,21 @@ f_stat_string = c("F-Statistic",
            )
 
 stargazer(model1, model2, model3, type="latex",
+          title = "Regression Table",
+          covariate.labels = c("Log Population Density",
+                               "Restaurant Shutdown Length (days)",
+                               "Gym Shutdown Length (days)",
+                               "Business Facemask Length (days)",
+                               "Traveler Quarantine Length (days)",
+                               "School Shutdown Length (days)",
+                               "Stay at Home Order Length (days)",
+                               "Bar Shutdown Length (days)",
+                               "Shutdown Speed after Pandemic (days)",
+                               "State of Emergency Speed (days)"
+                               ),
+          dep.var.labels = c(""),
+          dep.var.caption = "Dependent Variable: Log Covid-19 Cases",
+          column.labels = c("Simple Model","Moderate Model","Complex Model"),
           se = list(rse1, rse2, rse3),
           omit.stat = "f",
           add.lines = list(f_stat_string)
