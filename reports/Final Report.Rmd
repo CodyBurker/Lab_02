@@ -53,5 +53,36 @@ source(source_file)
 # model2
 # model3
 library(stargazer)
-stargazer(model1, model2, model3, type="latex")
+library(sandwich)
+library(lmtest)
+
+# Adjust standard errors
+cov1 <- vcovHC(model1)
+rse1 <- sqrt(diag(cov1))
+cov2 <- vcovHC(model2)
+rse2 <- sqrt(diag(cov2))
+cov3 <- vcovHC(model3)
+rse3 <- sqrt(diag(cov3))
+
+se_1 <- coeftest(model1,vcov. = cov1)
+se_2 <- coeftest(model2,vcov. = cov2)
+se_3 <- coeftest(model3,vcov. = cov3)
+
+# Get new f statistics
+f_stat1 <- waldtest(model1, vcov = cov1)
+f_stat2 <- waldtest(model2, vcov = cov2)
+f_stat3 <- waldtest(model3, vcov = cov3)
+
+# Create string array of modified F statistic
+f_stat_string = c("F-Statistic",
+                        paste(round(f_stat1$F[2],3),"***"," (df = 1; 49)", sep=""),
+                        paste(round(f_stat1$F[2],3),"***"," (df = 5; 45)", sep=""),
+                        paste(round(f_stat3$F[2],3),"***"," (df = 9; 41)", sep="")
+           )
+
+stargazer(model1, model2, model3, type="latex",
+          se = list(rse1, rse2, rse3),
+          omit.stat = "f",
+          add.lines = list(f_stat_string)
+)
 ```
