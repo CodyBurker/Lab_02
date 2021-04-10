@@ -20,7 +20,8 @@ table2 = table2 %>% rename(State.FIPS.Code = fips)
 table3 = inner_join(table2,table1,c("State.FIPS.Code"))
 
 table3_winterOnly = table3 %>% 
-  filter(`date`>="2020-03-01",`date`<"2020-06-01") %>% 
+  #filter(`date`>="2020-03-01",`date`<"2020-06-01") %>% 
+  filter(`date`<"2020-06-01") %>% 
   mutate(earliest_cases = ifelse(`date`==min(date),cases.x,0)) %>% 
   mutate(latest_cases = ifelse(`date`== max(date),cases.x,0)) %>% 
   group_by(state.x, 
@@ -47,8 +48,11 @@ table3_winterOnly = table3 %>%
            Closed.bars,
            Reopened.bars) %>% 
   summarise(sum(earliest_cases), sum(latest_cases)) %>% 
-  mutate(stayAtHomeStartDate = fifelse(is.na(Stay.at.home.order.issued.but.did.not.specifically.restrict.movement.of.the.general.public),
-                                       Stay.at.home.shelter.in.place,Stay.at.home.order.issued.but.did.not.specifically.restrict.movement.of.the.general.public)) %>% 
+  #mutate(stayAtHomeStartDate = fifelse(is.na(Stay.at.home.order.issued.but.did.not.specifically.restrict.movement.of.the.general.public),
+  #                                     Stay.at.home.shelter.in.place,Stay.at.home.order.issued.but.did.not.specifically.restrict.movement.of.the.general.public)) %>% 
+  mutate(stayAtHomeStartDate = fifelse(is.na(Stay.at.home.shelter.in.place),
+                                       Stay.at.home.order.issued.but.did.not.specifically.restrict.movement.of.the.general.public,
+                                       Stay.at.home.shelter.in.place )) %>% 
   mutate(inc_cases = `sum(latest_cases)`-`sum(earliest_cases)`) %>% 
   mutate(stayAtHomeSincePandemic = as.double(difftime(lubridate::ymd(stayAtHomeStartDate),
                                                       lubridate::ymd("2020-03-11"), units = "days"))) %>% 
@@ -56,8 +60,10 @@ table3_winterOnly = table3 %>%
                                           lubridate::ymd(stayAtHomeStartDate), units = "days"))) %>% 
   mutate(stayAtHome2 = as.double(difftime(lubridate::ymd(End.stay.at.home.shelter.in.place),
                                           lubridate::ymd(stayAtHomeStartDate), units = "days"))) %>% 
-  mutate(stayAtHomeLength = 
-           ifelse(is.na(End.stay.at.home.shelter.in.place), stayAtHome1,stayAtHome2)) %>% 
+  mutate(stayAtHome3 = as.double(difftime(lubridate::ymd("2020-05-31"),
+                                          lubridate::ymd(stayAtHomeStartDate), units = "days"))) %>% 
+  mutate(stayAtHomeLength = ifelse(is.na(End.stay.at.home.shelter.in.place), 
+                                   min(stayAtHome1,stayAtHome3),min(stayAtHome2,stayAtHome3))) %>% 
   mutate(stayAtHomeToNow = as.double(difftime(lubridate::ymd("2020-04-30"),
                                                       lubridate::ymd(stayAtHomeStartDate), units = "days"))) %>% 
   mutate(inc_cases_per100k = inc_cases/Population.2018*100000) %>% 
@@ -117,7 +123,7 @@ table3_winterOnly[is.na(table3_winterOnly$barsLength),"barsLength"]<-0
 table3_winterOnly[is.na(table3_winterOnly$schoolLength),"schoolLength"]<-0
 
 
-hist(log(table3_winterOnly$inc_cases_log))
+hist(table3_winterOnly$inc_cases_log)
 hist(log(table3_winterOnly$Population.density.per.square.mile))
 hist(table3_winterOnly$stayAtHomeSincePandemic*table3_winterOnly$stayAtHomeLength)
 
@@ -134,15 +140,13 @@ plot(model1, which = 2)
 hist(table3_winterOnly$Percent.living.under.the.federal.poverty.line..2018.)
 hist(table3_winterOnly$businessFMLength)
 hist(table3_winterOnly$stateOfEmergencySpeed)
-hist(log(table3_winterOnly$restaurantsLength))
+hist(table3_winterOnly$restaurantsLength)
+hist(table3_winterOnly$quarantineTravelersLength)
 
 model2 = lm(formula = inc_cases_log ~ Population_density_log + 
-              restaurantsLength +
-              gymsLength +
               businessFMLength + 
               quarantineTravelersLength +
-              schoolLength +
-              barsLength,
+              stayAtHomeLength,
             data = table3_winterOnly)
 summary(model2)
 
@@ -156,14 +160,12 @@ plot(model2, which = 2)
 hist(table3_winterOnly$quarantineTravelersLength)
 
 model3 = lm(formula = inc_cases_log ~ Population_density_log + 
-              restaurantsLength +
-              gymsLength +
               businessFMLength + 
               quarantineTravelersLength +
-              schoolLength +
-              barsLength+
-              stayAtHomeSincePandemic +
-              stateOfEmergencySpeed,
+              stayAtHomeLength +
+              restaurantsLength +
+              gymsLength +
+              barsLength,
             data = table3_winterOnly)
 summary(model3)
 
