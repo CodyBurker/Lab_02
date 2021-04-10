@@ -1,7 +1,7 @@
 ---
 title: "Research Proposal: How are state policies and population related to the state-wide spread of COVID-19?"
 author: 'Cody Burker, Emily Fernandes, Margo Suryanaga'
-output: pdf_document
+output: bookdown::pdf_document2
 ---
 
 ```{r setup, include=FALSE}
@@ -36,18 +36,21 @@ We will assume that these variables have no effect on COVID-19 cases, and will c
 
 # Regression Table
 
-The following is the regression table.
+Table \@ref(tab:regression) displays the regression of all 3 models. 
 
 ```{r warning=TRUE, include=FALSE}
 # Run Margo's file to load models into memory:
 
+#### CHANGE ME ####################
 ## Set working directory to where git was cloned to
 source_file = file("~/MIDS 203/Lab_02_SSH/src/data/lab2_MJS.R")
+# Also change the 
+###################################
 # Run Margo's file.
 source(source_file)
 ```
 
-```{r echo=FALSE, results = "asis"}
+```{r regression, echo=FALSE, message=FALSE, warning=FALSE, results="asis"}
 # Assumes that the following models are in-memory:
 # model1
 # model2
@@ -55,6 +58,7 @@ source(source_file)
 library(stargazer)
 library(sandwich)
 library(lmtest)
+library(tidyverse)
 
 # Adjust standard errors
 cov1 <- vcovHC(model1)
@@ -98,6 +102,25 @@ stargazer(model1, model2, model3, type="latex",
           column.labels = c("Simple Model","Moderate Model","Complex Model"),
           se = list(rse1, rse2, rse3),
           omit.stat = "f",
-          add.lines = list(f_stat_string)
+          add.lines = list(f_stat_string),
+          header=FALSE,
+          label = "tab:regression"
 )
 ```
+## Model 1
+
+We will begin by inspecting the first Model in Table \@ref(tab:regression).
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+table3_winterOnly %>%
+  ggplot(aes(x = Population_density_log,
+           y = inc_cases_log)) + 
+  geom_point() + 
+  geom_smooth(method="lm", se = FALSE) + 
+  labs(title = "Model 1: Log Population Density vs Log Covid-19 Cases",
+       x = "Log Population Density" , y = "Log Covid-19 Cases")
+```
+
+## Model 2
+
+## Model 3

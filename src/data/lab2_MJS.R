@@ -4,8 +4,10 @@ library(data.table)
 library(lmtest)
 library(lubridate)
 # Load data
+#### CHANGE ME ############################
 # setwd("~/W203/Assignments_MJS/Lab 2/data")
 setwd("/home/rstudio/MIDS 203/Lab_02_SSH/src/data")
+###########################################
 #table <- read_csv("CUSP_NYTimes.csv")
 
 # COVID policies
