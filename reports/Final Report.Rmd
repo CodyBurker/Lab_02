@@ -273,7 +273,7 @@ We first
 
 # Regression Table
 
-Table \@ref(tab:regression) displays the regression of all 3 models. 
+Table \@ref(tab:regression) displays the regression of all 3 models. We are use robust standard error. 
 
 
 ```{r regression, echo=FALSE, message=FALSE, warning=FALSE, results="asis"}
@@ -308,16 +308,17 @@ f_stat_string = c("F-Statistic",
 
 stargazer(model1, model2, model3, type="latex",
           title = "Regression Table",
-          covariate.labels = c("Log Population Density",
-                               "Business Facemask Length (days)",
-                               "Stay at Home Order Length (days)",
+          covariate.labels = c("Log (Population Density)",
+                               "Business mask mandate (days)",
+                               "Stay at home/shelter in place order (days)",
+                               "Interstate Travel Quarantine In Place Length (days)",
                                "Restaurant Shutdown Length (days)",
                                "Bar Shutdown Length (days)",
                                "Gym Shutdown Length (days)",
                                "State of Emergency Speed (days)"
           ),
           dep.var.labels = c(""),
-          dep.var.caption = "Dependent Variable: Log Covid-19 Cases",
+          dep.var.caption = "Dependent Variable: Log (Covid-19 Cases)",
           column.labels = c("Simple Model","Moderate Model","Complex Model"),
           se = list(rse1, rse2, rse3),
           omit.stat = "f",
@@ -328,8 +329,7 @@ stargazer(model1, model2, model3, type="latex",
 ```
 ## Model 1
 
-We will begin by inspecting the first Model in Table \@ref(tab:regression).
-
+We will begin by inspecting the first Model in Table \@ref(tab:regression). Here we see a significant relationship between the Log (Population Density) and 
 
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
