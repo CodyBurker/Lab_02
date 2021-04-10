@@ -79,7 +79,7 @@ NYT_Data <- NYT_Data[NYT_Data$date==end.date,]
 CUSP_Data=read.csv("CUSP_Clean.csv",na.strings = c(0))
 CUSP_Data$state = CUSP_Data$State
 
-
+#Merge Data
 total_data = merge(NYT_Data, CUSP_Data, by = "state")
 total_data<-total_data[order(total_data$state,total_data$date), ]
 
@@ -88,65 +88,30 @@ date = ref.date.list
 str1.stay.home.date = total_data$Stay.at.home.shelter.in.place
 str2.stay.home.date = total_data$Stay.at.home.order.issued.but.did.not.specifically.restrict.movement.of.the.general.public
 str.stay.home.date <- ifelse(str1.stay.home.date=='NA', str2.stay.home.date, str1.stay.home.date)
-
 end.stay.home.date = total_data$End.stay.at.home.shelter.in.place
-#end.stay.home.date[total_data$state=='Kentucky'] = '2020-06-29'   #note indicated this is end date
-#end.stay.home.date[total_data$state=='California'] = '2020-05-08' #changed to be when businesses were allowed to reopen
-#end.stay.home.date[total_data$state=='New Mexico'] = '2020-05-16' #changed to be when businesses were allowed to reopen
 
-
-#Create Indicator and sum days
-total_data$stay.home1.total=calc_num_days(str1.stay.home.date,end.stay.home.date,end.date)
-total_data$stay.home2.total=calc_num_days(str2.stay.home.date,end.stay.home.date,end.date)
 total_data$stay.home.total=calc_num_days(str.stay.home.date,end.stay.home.date,end.date)
 
-##Create Stay Home Variables
+##Create School Variables
 str.school.date = total_data$Closed.K.12.public.schools
-#str.school.date[total_data$state=='Rhode Island'] = '2020-03-16'
 end.school.date = rep( end.date, length(str.school.date))
-#Change RI schools closed https://ballotpedia.org/School_responses_in_Rhode_Island_to_the_coronavirus_(COVID-19)_pandemic_during_the_2020-2021_school_year
 
-
-str.business.date = total_data$Closed.other.non.essential.businesses
-end.business.date = total_data$Reopened.other.non.essential.retail
-end.business.date = total_data$Began.to.reopen.businesses.statewide
-
-#Create Indicator
-total_data$business.total=calc_num_days(str.business.date,end.business.date,end.date)
 total_data$close.school.total=calc_num_days(str.school.date,end.school.date,end.date)
 
 
-##Create Face Mask Variables 
-str.mask1.date = total_data$Public.face.mask.mandate
-str.mask2.date = total_data$Second.mandate.for.facemasks.by.all.individuals.in.public.places
+##Create Face Mask and Travel Variables 
 str.maskB.date = total_data$Business.face.mask.mandate
 str.travel.date.all = total_data$Quarantine.mandate.for.all.travelers
 str.travel.date.some = total_data$Quarantine.mandate.for.some.travelers
 str.travel.date <- ifelse(str.travel.date.all=='NA', str.travel.date.some, str.travel.date.all)
 
-data.frame(total_data$state,str.travel.date.all,str.travel.date.some,str.travel.date )
-
-
-end.mask1.date = total_data$End.face.mask.mandate
-end.mask2.date = rep('NA', length(end.mask1.date))
 end.maskB.date = total_data$End.face.mask.mandate
 end.travel.date = total_data$Quarantine.mandate.ended
 
-#Create Indicator
-total_data$mask1.total=calc_num_days(str.mask1.date,end.mask1.date,end.date)
-total_data$mask2.total=calc_num_days(str.mask2.date,end.mask2.date,end.date)
 total_data$maskB.total=calc_num_days(str.maskB.date,end.maskB.date,end.date)
 total_data$travel.total=calc_num_days(str.travel.date,end.travel.date,end.date)
 
-
-##Create Face Mask Pubishment Variables 
-total_data$mask.fines=total_data$Face.mask.mandate.enforced.by.fines
-total_data$mask.charge=total_data$Face.mask.mandate.enforced.by.criminal.charge.citation
-total_data$mask.no.enforcement=total_data$No.legal.enforcement.of.face.mask.mandate
-
-
-#Round 1
-##Round 1 Variables 
+#Round 1 Shutdowns
 str.res1.date = total_data$Closed.restaurants
 end.res1.date = total_data$Reopened.restaurants
 
@@ -156,55 +121,9 @@ end.gym1.date = total_data$Reopened.gyms
 str.bar1.date = total_data$Closed.bars
 end.bar1.date = total_data$Reopened.bars   
 
-str.movie1.date = total_data$Closed.movie.theaters
-end.movie1.date = total_data$Reopened.movie.theaters
-      
-#Create number of days
 total_data$res1.total=calc_num_days(str.res1.date,end.res1.date,end.date)
 total_data$gym1.total=calc_num_days(str.gym1.date,end.gym1.date,end.date)
 total_data$bar1.total=calc_num_days(str.bar1.date,end.bar1.date,end.date)
-total_data$movie1.total=calc_num_days(str.movie1.date,end.movie1.date,end.date)
-
-#Round 2
-#Closed.restaurants.x2 | Reopened.restaurants.x2
-#Closed.gyms.x2 | Reopened.gyms.x2
-#Closed.bars.x2 | Reopened.bars.x2
-#Closed.movie.theaters.x2 | Reopened.movie.theaters.x2
-
-##Round 2 Variables 
-str.res2.date = total_data$Closed.restaurants.x2
-end.res2.date = total_data$Reopened.restaurants.x2
-
-str.gym2.date = total_data$Closed.gyms.x2
-end.gym2.date = total_data$Reopened.gyms.x2
-
-str.bar2.date = total_data$Closed.bars.x2
-end.bar2.date = total_data$Reopened.bars.x2   
-
-str.movie2.date = total_data$Closed.movie.theaters.x2
-end.movie2.date = total_data$Reopened.movie.theaters.x2
-      
-#Create number of days
-total_data$res2.total=calc_num_days(str.res2.date,end.res2.date,end.date)
-total_data$gym2.total=calc_num_days(str.gym2.date,end.gym2.date,end.date)
-total_data$bar2.total=calc_num_days(str.bar2.date,end.bar2.date,end.date)
-total_data$movie2.total=calc_num_days(str.movie2.date,end.movie2.date,end.date)
-
-#Round 3
-#Closed.restaurants.x3 | Reopened.restaurants.x3
-#Closed.bars.x3 | NA
-
-##Round 3 Variables 
-str.res3.date = total_data$Closed.restaurants.x3
-end.res3.date = total_data$Reopened.restaurants.x3
-
-str.bar3.date = total_data$Closed.bars.x3
-end.bar3.date = rep('NA', length(end.mask1.date))  
-      
-#Create Indicator & total number of days
-total_data$res3.total=calc_num_days(str.res3.date,end.res3.date,end.date)
-total_data$bar3.total=calc_num_days(str.bar3.date,end.bar3.date,end.date)
-
 
 #Include Popluation Data
 total_data$population = as.numeric(total_data$Population.2018)
@@ -212,7 +131,7 @@ total_data$population.density = as.numeric(total_data$Population.density.per.squ
 total_data$cases = as.numeric(total_data$cases)
    
 #Create Speed Variables
-pandemic_date = rep('2020-03-11', length(end.mask1.date))  
+pandemic_date = rep('2020-03-11', length(str.stay.home.date))  
 stayAtHomeSincePandemic = calc_num_days_n(str.stay.home.date, pandemic_date,end.date)
 
 state.of.emergency = total_data$State.of.emergency
@@ -221,7 +140,6 @@ state.of.emergency.speed = calc_num_days_n(state.of.emergency, pandemic_date,end
 
 #Transformations
 Model_Data=total_data
-
 Model_Data$case.per.100k = (Model_Data$cases/Model_Data$population)*100000
 Model_Data$case.log = log(Model_Data$case.per.100k)
 Model_Data$population.density.log = log(Model_Data$population.density)
@@ -271,6 +189,38 @@ We will investigate the causal effect that various variables have on the 7-day m
 - When mask mandates were required (as an indicator variable, and as how many days since the mandate started)\
 - Whether the state implemented legal consequences for violating stay-at-home orders\
 We will assume that these variables have no effect on COVID-19 cases, and will construct tests to investigate whether a relationship exists.
+
+
+
+
+Our team would like to study the initial spread of the Covid-19 virus, from the first case seen in the United States until May 31st. Our goal was to create a series of models to explain the relationship between the various state policies put in place to curtail the spread of the virus and the number of cases observed in each state. In the analysis we will use the following policies as input variables:
+*Business mask mandate (measured in days the policy was in place)
+*Stay at home/shelter in place order (measured in days the policy was in place)
+*Interstate travel quarantines (measured in days the policy was in place)
+*Restaurant/Bar/Gym Shutdowns (measured in days the policy was in place)
+*Shutdown declared in relationship to day 
+*State of Emergency declared in relationship to 3-11-2020 (Date that the World Health Organization declared the Covid-19 Pandemic) relationship to 3-11-2020 (Date that the World Health Organization declared the Covid-19 Pandemic)
+
+We understand that the spread of Covid-19 is also influenced by not just state policies, but also by the relative closeness of people within each state. In an effort to capture this, we will also include the population density as an input variable. With these inputs, we hope to explain which state policies were effective at curtailing the initial spread of the Covid-19 virus. 
+
+First, we began to explore the number of cases in each state per 100,000 residents. This allowed us to account for the number of cases while equalizing the predicted variable to account for the fact that New York or California will have a much larger number of cases than Alaska simple due to the fact these states have many more residents. 
+```{r predicted var hist, include=FALSE}
+
+hist1<-ggplot(Model_Data, aes(x=case.per.100k)) + 
+   geom_histogram(color="black", fill="grey",binwidth=.25)+
+   ylab('Frequency')+xlab('Number of Cases per 100k State Residents')
+hist2<-ggplot(Model_Data, aes(x=case.log)) + 
+   geom_histogram(color="black", fill="grey",binwidth=.25)+
+   ylab('Frequency')+xlab('Lof of Number of Cases per 100k State Residents')
+
+
+```
+
+
+
+
+
+
 
 # Regression Table
 
