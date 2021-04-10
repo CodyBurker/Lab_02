@@ -334,16 +334,16 @@ stargazer(model1, model2, model3, type="latex",
 ```
 ## Model 1
 
-We will begin by inspecting the first Model in Table \@ref(tab:regression). Here we see a significant relationship between Log (Population Density) and Log (Covid-19 Cases). Figure  \@ref(tab:regression) displays a scatterplot of the two, and we do see some relationship. The coeffeficient is positive, indicating that a higher density is related to a larger number of Covid-19 cases per 100,000 people in a state. Because (using robust standard errors) this relationship is significant (p < 0.001) we reject the hypothesis that there is no relationship between Log (Population Density) and Log(Covid-19 Cases).
+We will begin by inspecting the first Model in Table \@ref(tab:regression). Here we see a significant relationship between Log (Population Density) and Log (Covid-19 Cases). Figure  \@ref(tab:regression) displays a scatterplot of the two, and we do see some relationship. The coeffeficient is positive, indicating that a higher density is related to a larger number of Covid-19 cases per 100,000 people in a state. Because (using robust standard errors) this relationship is significant (p < 0.001) we reject the hypothesis that there is no relationship between Log (Population Density) and Log(Covid-19 Cases) in favor of the hypothesis that there is a relationship. The following model was used to test the relationship between the two variables:
 
 $$
 \log (\text{Covid-19 Cases}) = \beta_0 + \beta_1 \log (\text{Population Density}) \\
 $$
 
 
-This implies that  every percent increase in Population Density (measured in people / square mile) causes a `r model1$coefficients[2] %>% format(digits=2)`% increase in Covid19 Cases per 100,000 people in a state. While it is likely not feasible to reduce Population Density, this relationship should inform policy makers as to which states to direct funding.
+This model implies that  every percent increase in Population Density (measured in people / square mile) causes a `r model1$coefficients[2] %>% format(digits=2)`% increase in Covid19 Cases per 100,000 people in a state, which has much practical significance. While it is likely not feasible to reduce Population Density, this number might inform policy makers as to which states are more vulnerable to future pandemics. Also, this model has an $R^2$ value of `r format(summary(model1)$r.squared, digits=2)`, it seems as if the transformed population density accounts for a surprising amount of the variance in Log (Covid19 Cases).
 
-```{r covid-density-scatter, echo=FALSE, message=FALSE, warning=FALSE}
+```{r covid-density-scatter, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Scatterplot of Model1"}
 ggplot(Model_Data, aes(y=case.log, x=population.density.log)) + 
   geom_point() + 
   geom_smooth(method="lm", se = FALSE) + 
@@ -353,4 +353,14 @@ ggplot(Model_Data, aes(y=case.log, x=population.density.log)) +
 
 ## Model 2
 
+For our second model, we find evidence that there is a relationship between how long states took to enact business mask mandates after the pandemic was declared (Business mask Mandate), how long the stay at home order was in place (Stay at home/shelter in place order), and how long the interstate travel quarantine was in place (Interstate Travel Quarantine In Place Length) in addition to the Log (Population Density). The coefficient for Log (Population Density) decreases from 0.358 to 0.329 (but remains significant), indicating that some of its explanatory power is shared between the other variables we have included (and also perhaps there is a small amount of colinearity between this variable and one or more of the others). 
+
+When we inspect the Stay at home/shelter in place order coefficient, we see that it is both significant and negative This indicates that for every extra day that a state spend with a Stay at home/sheter in place order in effect if all else is held equal, we expect to see a `r round(model2$coefficients['stay.home.total'] * -1 *  100,3)`% *decrease* in Covid19 cases. This is a very large number, and because it has a small p-value we are sure that there is a relationship. This speaks strongly to the efficacy of such orders, and the low p-value (`r round(coeftest(model2, vcov=cov2)[4,4],3)`) gives us reason to believe that there is a relatively low chance this relationship exists by chance.
+
+Inspection of the Interstate Travel Quarantine In Place Length leads to a similiar result. We see that the p-value is low enough (`r round(coeftest(model2, vcov=cov2)[5,4],3)`) that we should reject the idea that restricting travel does not affect Covid19 cases. The effect size (1 more day of restricting interstate travel leads to `r round(model2$coefficients['travel.total'] * -100,3)`% decrease in Covid19 cases, all else held equal) is nearly as large as the Stay at home/shelter in place order, meaning that they have relatively similar effects on Covid19 cases.
+
+When we inspect the Business mask mandate variable, we find something surprising: it is significant, however it is also positive. This is counterintuitive: we would expect that the longer a mandate for business masks is in place, the lower the number of cases. One explanation for this might be reverse causality. Although we assumed that Business mask mandate influenced Log (Covid-19 Cases), it is possible that Log (Covid-19 Cases) also influenced Business mask mandate. For example, as the number of Covid19 cases increased, states lengthened or reenacted their business mask mandates as a result/in reaction to rising cases. This would explain why, according to our model, every 1 days of increased business mask mandate is associated with a `r round(model2$coefficients['maskB.total'] * 100,3)`% increase in Covid19 cases per 100,000 residents.
+
 ## Model 3
+
+For our last model, we add many extra variables. However, none of the additional variables were significant, and the Adjusted $R^2$ actually decreased (from 0.550 to 0.525) compared to the second model, indicating that this model is not efficient. We also seem some interesting effects on the variables that were already in model 2. Stay at home/shelter in place order and Interstate Travel Quarantine In Place Length actually are no longer significant. This might indicate that there exist one or more linear relationships between these two variables and the new variables added. Business mask mandate remains significant though. Log (Population Density) retains its significance (alluding to a very strong relationship). Overall this model does not seem to provide much useful information compared to the previous, simpler models.
