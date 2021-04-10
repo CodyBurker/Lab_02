@@ -294,6 +294,10 @@ rse2 <- sqrt(diag(cov2))
 cov3 <- vcovHC(model3)
 rse3 <- sqrt(diag(cov3))
 
+p_val1 <- coeftest(model1, vcov. = cov1)[,4]
+p_val2 <- coeftest(model2, vcov. = cov2)[,4]
+p_val3 <- coeftest(model3, vcov. = cov3)[,4]
+
 # Get new f statistics
 f_stat1 <- waldtest(model1, vcov = cov1)
 f_stat2 <- waldtest(model2, vcov = cov2)
@@ -324,15 +328,22 @@ stargazer(model1, model2, model3, type="latex",
           omit.stat = "f",
           add.lines = list(f_stat_string),
           header=FALSE,
-          label = "tab:regression"
+          label = "tab:regression",
+          p = list(p_val1, p_val2, p_val3)
 )
 ```
 ## Model 1
 
-We will begin by inspecting the first Model in Table \@ref(tab:regression). Here we see a significant relationship between the Log (Population Density) and 
+We will begin by inspecting the first Model in Table \@ref(tab:regression). Here we see a significant relationship between Log (Population Density) and Log (Covid-19 Cases). Figure  \@ref(tab:regression) displays a scatterplot of the two, and we do see some relationship. The coeffeficient is positive, indicating that a higher density is related to a larger number of Covid-19 cases per 100,000 people in a state. Because (using robust standard errors) this relationship is significant (p < 0.001) we reject the hypothesis that there is no relationship between Log (Population Density) and Log(Covid-19 Cases).
+
+$$
+\log (\text{Covid-19 Cases}) = \beta_0 + \beta_1 \log (\text{Population Density}) \\
+$$
 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+This implies that  every percent increase in Population Density (measured in people / square mile) causes a `r model1$coefficients[2] %>% format(digits=2)`% increase in Covid19 Cases per 100,000 people in a state. While it is likely not feasible to reduce Population Density, this relationship should inform policy makers as to which states to direct funding.
+
+```{r covid-density-scatter, echo=FALSE, message=FALSE, warning=FALSE}
 ggplot(Model_Data, aes(y=case.log, x=population.density.log)) + 
   geom_point() + 
   geom_smooth(method="lm", se = FALSE) + 
