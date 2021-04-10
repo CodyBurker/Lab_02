@@ -1,5 +1,5 @@
 ---
-title: "Research Proposal: How are state policies and population related to the state-wide spread of COVID-19?"
+title: "Can implementing state policies help prevent the state-wide spread of COVID-19?"
 author: 'Cody Burker, Emily Fernandes, Margo Suryanaga'
 output: bookdown::pdf_document2
 ---
@@ -92,13 +92,6 @@ end.stay.home.date = total_data$End.stay.at.home.shelter.in.place
 
 total_data$stay.home.total=calc_num_days(str.stay.home.date,end.stay.home.date,end.date)
 
-##Create School Variables
-str.school.date = total_data$Closed.K.12.public.schools
-end.school.date = rep( end.date, length(str.school.date))
-
-total_data$close.school.total=calc_num_days(str.school.date,end.school.date,end.date)
-
-
 ##Create Face Mask and Travel Variables 
 str.maskB.date = total_data$Business.face.mask.mandate
 str.travel.date.all = total_data$Quarantine.mandate.for.all.travelers
@@ -132,11 +125,8 @@ total_data$cases = as.numeric(total_data$cases)
    
 #Create Speed Variables
 pandemic_date = rep('2020-03-11', length(str.stay.home.date))  
-stayAtHomeSincePandemic = calc_num_days_n(str.stay.home.date, pandemic_date,end.date)
-
 state.of.emergency = total_data$State.of.emergency
 state.of.emergency.speed = calc_num_days_n(state.of.emergency, pandemic_date,end.date)
-
 
 #Transformations
 Model_Data=total_data
@@ -162,26 +152,39 @@ model3 = lm(case.log~population.density.log+
                       state.of.emergency.speed, data = Model_Data)
 ```
 
+\newpage
 
-# Background
+# Which COVID-19 policies implemented by states have an effect on the statewide initial spread of COVID-19?
+## Introduction
 
 The COVID-19 pandemic is the first pandemic seen in a century, affecting each individual worldwide. While many countries issued lockdowns, travel quarantines, and other COVID-19 restrictions on a federal level, the US federal government placed the power with the governors to regulate the implementation of these restrictions on a state-by-state basis.
 
-There has been increased skepticism on the true effectiveness of restrictions in slowing down the spread of COVID-19, especially due to the amount of economic impact resulting from these procedures. Evaluating how each state's population density, lockdown procedures, and facemask policies correlates to the spread of COVID-19 within that state helps citizens understand the importance of following these policies. Understanding the effectiveness of COVID-19 restrictions in slowing the spread of the disease also helps policy makers justify the implementation of these policies to their constituents. Additionally, this information might be of interest to public health officials who are looking for best practices to contain a future pandemic or infectious disease.
+There has been increased skepticism on the true effectiveness of restrictions in slowing down the spread of COVID-19, especially due to the amount of economic impact resulting from these procedures. Evaluating which COVID-19 restrictions helped prevent the initial spread of COVID-19 within that state helps citizens understand the importance of following these policies. Understanding the effectiveness of COVID-19 restrictions in slowing the initial spread of the disease also helps policy makers justify the implementation of these policies to their constituents. Additionally, this information might be of interest to public health officials who are looking for best practices to contain a future pandemic or infectious disease.
 
-# Data sources
+From this, we are focusing on the following main research question:\
+`Which COVID-19 policies implemented by states have an effect on the statewide initial spread of COVID-19?`\
 
-1.  [COVID-19 US State Policy Database](www.tinyurl.com/statepolicies) A database of state policy responses to the pandemic, compiled by researchers at the Boston University School of Public Health.
-2.  [NY Times Covid-19 Data Repository](https://github.com/nytimes/covid-19-data) A series of data files with cumulative counts of coronavirus cases in the United States, at the state and county level, over time.
+As part of our research we will specifically be looking at the following policies implemented by various states:\
+1. Stay at home/shelter in place order length\
+2. Face mask mandate specifically for businesses length\
+3. Interstate travel quarantine length\
+4. Restaurant shutdown length\
+5. Gyms shutdown length\
+6. Bars shutdown length\
+7. Declaration of a state of emergency\
 
-From data source (1), we expect to get:\
-- Closure and reopenings: Start and end dates of closures of public spaces\
-- Stay at home: Start and end dates of stay at home policies\
-- Face masks: Start and end date of face mask mandates\
-From data source (2) we expect to get:\
-- Weekly COVID-19 case counts
+Understanding the nature of COVID-19 as being a highly infectious disease, we believe the first few months are the most crucial times in controlling an outbreak. Thus, we define an `initial spread of COVID-19` to be the number of cases at 05/31/2020. We believe this reflects the initial rise of cases from $0$ to $x$ within the first few crucial months of the pandemic.\
 
-# Methodology and Expected outcome
+We used the following data sources:\
+a)  [COVID-19 US State Policy Database](www.tinyurl.com/statepolicies) A database of state policy responses to the pandemic, compiled by researchers at the Boston University School of Public Health.\
+
+We used this data source to get start and end dates to evaluate length in days of policies 1 through 6 listed above and the date a state of emergency was declared to evaluate the speed at which a state of emergency was declared within each state (policy 7). This source additionally provided us with population data by state and population density per square mile by state.\
+
+b)  [NY Times Covid-19 Data Repository](https://github.com/nytimes/covid-19-data) A series of data files with cumulative counts of coronavirus cases in the United States, at the state and county level, over time.\
+
+We used this data source to get the number of cases at 05/31/2020 on a state level.\
+
+## A Model Building Process
 
 Our team would like to study the initial spread of the Covid-19 virus, from the first case seen in the United States until May 31st. Our goal was to create a series of models to explain the relationship between the various state policies put in place to curtail the spread of the virus and the number of cases observed in each state. In the analysis we will use the following policies as input variables:
 *Business mask mandate (measured in days the policy was in place)
@@ -191,7 +194,7 @@ Our team would like to study the initial spread of the Covid-19 virus, from the 
 *Shutdown declared in relationship to day 
 *State of Emergency declared in relationship to 3-11-2020 (Date that the World Health Organization declared the Covid-19 Pandemic) relationship to 3-11-2020 (Date that the World Health Organization declared the Covid-19 Pandemic)
 
-We understand that the spread of Covid-19 is also influenced by not just state policies, but also by the relative closeness of people within each state. In an effort to capture this, we will also include the population density as an input variable. With these inputs, we hope to explain which state policies were effective at curtailing the initial spread of the Covid-19 virus. For each model we will evaluate the sssumptions for a Classical Linera Model. These requirements are:
+We understand that the spread of Covid-19 is also influenced by not just state policies, but also by the relative closeness of people within each state. In an effort to capture this, we will also include the population density as an input variable. With these inputs, we hope to explain which state policies were effective at curtailing the initial spread of the Covid-19 virus. For each model we will evaluate the sssumptions for a Classical Linear Model. These requirements are:
 
 1. I.I.D. 
 2. Linear Conditional Expectation Exists
@@ -269,9 +272,7 @@ For our next model, we chose to build off the basic model while adding several i
 We first 
 
 
-
-
-# Regression Table
+## Regression Table
 
 Table \@ref(tab:regression) displays the regression of all 3 models. We are use robust standard error. 
 
@@ -332,7 +333,7 @@ stargazer(model1, model2, model3, type="latex",
           p = list(p_val1, p_val2, p_val3)
 )
 ```
-## Model 1
+### Model 1
 
 We will begin by inspecting the first Model in Table \@ref(tab:regression). Here we see a significant relationship between Log (Population Density) and Log (Covid-19 Cases). Figure  \@ref(tab:regression) displays a scatterplot of the two, and we do see some relationship. The coeffeficient is positive, indicating that a higher density is related to a larger number of Covid-19 cases per 100,000 people in a state. Because (using robust standard errors) this relationship is significant (p < 0.001) we reject the hypothesis that there is no relationship between Log (Population Density) and Log(Covid-19 Cases) in favor of the hypothesis that there is a relationship. The following model was used to test the relationship between the two variables:
 
@@ -351,7 +352,7 @@ ggplot(Model_Data, aes(y=case.log, x=population.density.log)) +
        x = "Log Population Density" , y = "Log Covid-19 Cases")
 ```
 
-## Model 2
+### Model 2
 
 For our second model, we find evidence that there is a relationship between how long states took to enact business mask mandates after the pandemic was declared (Business mask Mandate), how long the stay at home order was in place (Stay at home/shelter in place order), and how long the interstate travel quarantine was in place (Interstate Travel Quarantine In Place Length) in addition to the Log (Population Density). The coefficient for Log (Population Density) decreases from 0.358 to 0.329 (but remains significant), indicating that some of its explanatory power is shared between the other variables we have included (and also perhaps there is a small amount of colinearity between this variable and one or more of the others). 
 
@@ -361,6 +362,20 @@ Inspection of the Interstate Travel Quarantine In Place Length leads to a simili
 
 When we inspect the Business mask mandate variable, we find something surprising: it is significant, however it is also positive. This is counterintuitive: we would expect that the longer a mandate for business masks is in place, the lower the number of cases. One explanation for this might be reverse causality. Although we assumed that Business mask mandate influenced Log (Covid-19 Cases), it is possible that Log (Covid-19 Cases) also influenced Business mask mandate. For example, as the number of Covid19 cases increased, states lengthened or reenacted their business mask mandates as a result/in reaction to rising cases. This would explain why, according to our model, every 1 days of increased business mask mandate is associated with a `r round(model2$coefficients['maskB.total'] * 100,3)`% increase in Covid19 cases per 100,000 residents.
 
-## Model 3
+### Model 3
 
 For our last model, we add many extra variables. However, none of the additional variables were significant, and the Adjusted $R^2$ actually decreased (from 0.550 to 0.525) compared to the second model, indicating that this model is not efficient. We also seem some interesting effects on the variables that were already in model 2. Stay at home/shelter in place order and Interstate Travel Quarantine In Place Length actually are no longer significant. This might indicate that there exist one or more linear relationships between these two variables and the new variables added. Business mask mandate remains significant though. Log (Population Density) retains its significance (alluding to a very strong relationship). Overall this model does not seem to provide much useful information compared to the previous, simpler models.
+
+## Limitations of your Model 
+
+As a team, evaluate all of the CLM assumptions that must hold for your model. However, do not report an exhaustive examination all 5 CLM assumption. Instead, bring forward only those assumptions that you think pose significant problems for your analysis. For each problem that you identify, describe the statistical consequences. If you are able to identify any strategies to mitigate the consequences, explain these strategies. 
+
+Note that you may need to change your model specifications in response to violations of the CLM. 
+
+## Discussion of Omitted Variables
+
+If the team has taken up an explanatory (i.e. causal) question to evaluate, then identify what you think are the 5 most important *omitted variables* that bias results you care about. For each variable, you should *reason about the direction of bias* caused by omitting this variable. If you can argue whether the bias is large or small, that is even better. State whether you have any variables available that may proxy (even imperfectly) for the omitted variable. Pay particular attention to whether each omitted variable bias is *towards zero or away from zero*. You will use this information to judge whether the effects you find are likely to be real, or whether they might be entirely an artifact of omitted variable bias.
+
+## Conclusion
+
+Make sure that you end your report with a discussion that distills key insights from your estimates and addresses your research question.
