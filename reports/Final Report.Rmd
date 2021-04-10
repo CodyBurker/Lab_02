@@ -186,7 +186,7 @@ We used this data source to get the number of cases at 05/31/2020 on a state lev
 
 ## A Model Building Process
 
-Our team would like to study the initial spread of the Covid-19 virus, from the first case seen in the United States until May 31st. Our goal was to create a series of models to explain the relationship between the various state policies put in place to curtail the spread of the virus and the number of cases observed in each state. In the analysis we will use the following policies as input variables:
+Our team is studying the factors that limited the initial spread of the Covid-19 virus, from the first case seen in the United States until May 31st. Our goal is to create a series of models to explain the relationship between the various state policies put in place to curtail the spread of the virus and the number of cases observed in each state. In the analysis we will use the following policies as input variables:
 *Business mask mandate (measured in days the policy was in place)
 *Stay at home/shelter in place order (measured in days the policy was in place)
 *Interstate travel quarantines (measured in days the policy was in place)
@@ -194,17 +194,12 @@ Our team would like to study the initial spread of the Covid-19 virus, from the 
 *Shutdown declared in relationship to day 
 *State of Emergency declared in relationship to 3-11-2020 (Date that the World Health Organization declared the Covid-19 Pandemic) relationship to 3-11-2020 (Date that the World Health Organization declared the Covid-19 Pandemic)
 
-We understand that the spread of Covid-19 is also influenced by not just state policies, but also by the relative closeness of people within each state. In an effort to capture this, we will also include the population density as an input variable. With these inputs, we hope to explain which state policies were effective at curtailing the initial spread of the Covid-19 virus. For each model we will evaluate the sssumptions for a Classical Linear Model. These requirements are:
+The spread of Covid-19 is not just influenced by state policies, but also by the relative closeness of people within each state. In an effort to capture this, we will also include the population density as an input variable. With these inputs, we hope to explain which state policies were effective at curtailing the initial spread of the Covid-19 virus. 
 
-1. I.I.D. 
-2. Linear Conditional Expectation Exists
-3. No Colinearity
-4. No Homoskedastic Error
-5. Normal Residuals
 
-The data use for the following models 
+## Model 1
 
-First, we began to explore the number of cases in each state per 100,000 residents. This allowed us to account for the number of cases while equalizing the predicted variable to account for the fact that New York or California will have a much larger number of cases than Alaska simple due to the fact these states have many more residents. After viewing the histogram of the number of cases per state per 100k residents, our team chose to handle the skew of the data by completeing a log transformation. The histogram of the log transformed variable can be seen below.
+First, we began to explore the number of cases in each state per 100,000 residents. This allowed us to account for the number of cases while equalizing the predicted variable to account for the fact that New York or California will have a much larger number of cases than Alaska simple due to the fact these states have many more residents. After viewing the histogram of the number of cases per state per 100k residents, our team chose to handle the skew of the data by completing a log transformation. The histogram of the log transformed variable can be seen below.
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 require(gridExtra)
 hist1<-ggplot(Model_Data, aes(x=case.per.100k)) + 
@@ -232,44 +227,75 @@ hist2<-ggplot(Model_Data, aes(x=population.density.log)) +
 grid.arrange(hist1, hist2, nrow=2) 
 ```
 Our base model will look at the log relationship of each state's cases on May 31st, 2020 per 100k residents with that state's population density. 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-Model_Data <- Model_Data %>%  mutate(model1_res = resid(model1))
-Model_Data <- Model_Data %>% mutate(model1_prd = predict(model1)) 
 
-#Create a scatterplot with current model's regression line
-Regression_Plot <- ggplot(Model_Data, aes(x = population.density.log, y = case.log)) + 
-      geom_point()+
-      geom_line(data = Model_Data, 
-                aes(x = population.density.log, y = model1_prd))+
-      ggtitle(paste('Relationship of Log(Covid-19 Cases per 100k Residents)',
-                    '\n', 'and Log(Population Density)'))+
-      ylab(paste('Log(Covid-19 Cases', '\n','per 100k Residents)'))+
-      xlab('Log(Population Density)')+geom_point()
 
-#Residuals versus Predictors
-Residuals_Plot = ggplot(data = Model_Data, aes(x = model1_prd, y = model1_res)) + 
-  geom_point() + stat_smooth(se = TRUE)+
-  ylab('Base Model Residuals')+xlab('Predictors')
-
-#Histogram of Residuals
-Normal_Residuals<-ggplot(Model_Data, aes(x=model1_res)) + 
-   geom_histogram(color="black", fill="grey")+
-   ylab('Frequency')+xlab("Base Model Residuals")
-
-grid.arrange(Regression_Plot, Residuals_Plot,nrow=2) 
-```
-From the Residual/Predictors plot shown above, one can see that this basic model's predictors has a fairly linear relationship with residuals implying that a Linear Conditional Expectation exists. Colinearlity cannot exist for this base model because we only have 1 input variable. The Residual/Predictors plot displays a flaring of the standard error at the extremes which implies the potential for Homoskedastic errors, therefore we will use robust standard error when reviewing the significance level of this model's coefficients. Lastly we have a plot of the basic model's residuals to ensure they are normal. As you can see from the histogram below, the residual's are in fact normally distributed. 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
-#shapiro.test(Model_Data$model1_res)
-Normal_Residuals
-```
+## Model 2
 
 For our next model, we chose to build off the basic model while adding several inputs to represent key state policies. This next model will also account for the number of days each state had a:
-*Business mask mandate
+
+*Business mask mandate 
 *Stay at home/shelter in place order
 *Interstate travel quarantine
 
-We first 
+The stay at home order was the first and strongest policy set by many states. This was a drastic policy enacted to limit face to face interactions in hopes that it would slow the spread of the virus. We expect a strong relationship between long stay at home orders and curtailed spread. This was additionally supported by the closing of businesses so there were no places to go. The interstate travel quarantine was another attempt to limit face to face interactions with those who may not follow that state's policies. This variable captures each state's attempt to isolate themselves from other state policies. Finally, we included a variable to describe each state's mask mandate for businesses in order to capture the safety measures taken as states attempted to reopen their economies.
+
+
+We first reviewed the histograms of our new input variables. Aside from the spike at 0 (which indicates states that did not wish to implement this specific policy), the variables look fairly normal.
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#Input Hist 
+input_1<-ggplot(Model_Data, aes(x=population.density.log)) + 
+   geom_histogram(color="black", fill="grey")+
+   ylab('Frequency')+xlab("Log of State's Polulation Density")
+input_2<-ggplot(Model_Data, aes(x=maskB.total)) + 
+   geom_histogram(color="black", fill="grey")+
+   ylab('Frequency')+xlab('Business Mask Mandate (Days in Place)')
+input_3<-ggplot(Model_Data, aes(x=stay.home.total)) + 
+   geom_histogram(color="black", fill="grey")+
+   ylab('Frequency')+xlab(paste('Stay at Home/Shelter in Place Order','\n','(Days in Place)'))
+input_4<-ggplot(Model_Data, aes(x=travel.total)) + 
+   geom_histogram(color="black", fill="grey")+
+   ylab('Frequency')+xlab('Interstate Travel Quarantine (Days in Place)')
+grid.arrange(input_1,input_2,input_3,input_4, nrow=2) 
+```
+
+
+## Model 3
+
+And finally for our most complex model will also account for the number of days each state had:
+*Restaurant Shutdowns
+*Bar Shutdowns
+*Gym Shutdowns 
+*State of Emergency Speed (measured in days from 3/11/2020)
+
+In our final model we choose to include data that more likely supported the information covered in our medium complexity model. For example, the shutting down of restaurants, bar, and gyms made it much easier for the public to comply with the stay at home mandate. If the businesses of the state are closed, where could people congregate? Unfortunately, this may lead to colinearily between the variables. This colinearily may add noise to our model if shutdowns occurred simultaneously or alternatively if shutdowns occurred at the same time as the stay at home order. We expect relationship between long closures and lower infection rates. Finally we attempted to add a variable to capture how quickly a state responded to this crisis. Preemptive policies will lead to less initial cases and therefore initial vectors to spread the disease. This variable is the days between when a state declared a state of emergency in relation to the day the World Health Organization (WHO) declared Covid-19 a pandemic. We expect negative and small numbers (States of Emergency called before or around 3/11/2020) to align with curtailed rates of infection.
+
+
+
+We first reviewed the histograms of our new input variables. The speed of each state's State of Emergency declaration closely aligns to a normal distribution. However each of the shutdown variables displays a slight skew. While not ideal, this skew does not span over factors of tens and therefore we did not feel it appropriate to use a log transformation. 
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+shapiro.test(Model_Data$res1.total)
+
+#Input Hist 
+input_1<-ggplot(Model_Data, aes(x=res1.total)) + 
+   geom_histogram(color="black", fill="grey")+
+   ylab('Frequency')+xlab("Restaurant Shutdowns (Days)")
+input_2<-ggplot(Model_Data, aes(x=bar1.total)) + 
+   geom_histogram(color="black", fill="grey")+
+   ylab('Frequency')+xlab("Bar Shutdowns (Days)")
+input_3<-ggplot(Model_Data, aes(x=gym1.total)) + 
+   geom_histogram(color="black", fill="grey")+
+   ylab('Frequency')+xlab("Gym Shutdowns (Days)")
+input_4<-ggplot(Model_Data, aes(x=state.of.emergency.speed)) + 
+   geom_histogram(color="black", fill="grey")+
+   ylab('Frequency')+xlab('Speed of State of Emergency (Days)')
+grid.arrange(input_1,input_2,input_3,input_4, nrow=2) 
+```
+
+It is noteworthy that the variable describing the speed of State of Emergency Declaration may be negative. This means that the state in question declared a State of Emergency before the WHO declared Covid-19 as a pandemic. 
+
+
+
+
 
 
 ## Regression Table
@@ -368,9 +394,218 @@ For our last model, we add many extra variables. However, none of the additional
 
 ## Limitations of your Model 
 
-As a team, evaluate all of the CLM assumptions that must hold for your model. However, do not report an exhaustive examination all 5 CLM assumption. Instead, bring forward only those assumptions that you think pose significant problems for your analysis. For each problem that you identify, describe the statistical consequences. If you are able to identify any strategies to mitigate the consequences, explain these strategies. 
+Our team is studying the factors that limited the initial spread of the Covid-19 virus, from the first case seen in the United States until May 31st. Our goal is to create a series of models to explain the relationship between the various state policies put in place to curtail the spread of the virus and the number of cases observed in each state. In the analysis we will use the following policies as input variables:
+*Business mask mandate (measured in days the policy was in place)
+*Stay at home/shelter in place order (measured in days the policy was in place)
+*Interstate travel quarantines (measured in days the policy was in place)
+*Restaurant/Bar/Gym Shutdowns (measured in days the policy was in place)
+*Shutdown declared in relationship to day 
+*State of Emergency declared in relationship to 3-11-2020 (Date that the World Health Organization declared the Covid-19 Pandemic) relationship to 3-11-2020 (Date that the World Health Organization declared the Covid-19 Pandemic)
 
-Note that you may need to change your model specifications in response to violations of the CLM. 
+The spread of Covid-19 is not just influenced by state policies, but also by the relative closeness of people within each state. In an effort to capture this, we will also include the population density as an input variable. With these inputs, we hope to explain which state policies were effective at curtailing the initial spread of the Covid-19 virus. 
+
+
+## Model 1
+
+First, we began to explore the number of cases in each state per 100,000 residents. This allowed us to account for the number of cases while equalizing the predicted variable to account for the fact that New York or California will have a much larger number of cases than Alaska simple due to the fact these states have many more residents. After viewing the histogram of the number of cases per state per 100k residents, our team chose to handle the skew of the data by completing a log transformation. The histogram of the log transformed variable can be seen below.
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+require(gridExtra)
+hist1<-ggplot(Model_Data, aes(x=case.per.100k)) + 
+   geom_histogram(color="black", fill="grey")+
+   ylab('Frequency')+xlab('Number of Cases per 100k State Residents')+
+   ggtitle('Predicted Variable Histograms')+
+  theme(plot.title = element_text(hjust = 0.5))
+hist2<-ggplot(Model_Data, aes(x=case.log)) + 
+   geom_histogram(color="black", fill="grey")+
+   ylab('Frequency')+xlab('Log of Number of Cases per 100k State Residents')
+grid.arrange(hist1, hist2, nrow=2) 
+```
+
+
+For our base model, we chose to select the one input variable that was a characteristic of the state and not a policy enacted by the state. We hypothesize that the state's population density is one of the first building blocks to describe the number of cases in that state on May 31st, 2020. Close human contact is how this virus spreads and population density captures the relative closeness of residents in a state. Again, after viewing the initial highly skewed histogram we chose to complete a log transformation of this variable. The transformed histogram can be seen below.
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+hist1<-ggplot(Model_Data, aes(x=population.density)) + 
+   geom_histogram(color="black", fill="grey")+
+   ylab('Frequency')+xlab("State's Polulation Density (People per square mile) ")+
+   ggtitle('Input Variable Histograms')+
+  theme(plot.title = element_text(hjust = 0.5))
+hist2<-ggplot(Model_Data, aes(x=population.density.log)) + 
+   geom_histogram(color="black", fill="grey")+
+   ylab('Frequency')+xlab("Log of State's Polulation Density")
+grid.arrange(hist1, hist2, nrow=2) 
+```
+Our base model will look at the log relationship of each state's cases on May 31st, 2020 per 100k residents with that state's population density. 
+
+
+## Model 2
+
+For our next model, we chose to build off the basic model while adding several inputs to represent key state policies. This next model will also account for the number of days each state had a:
+
+*Business mask mandate 
+*Stay at home/shelter in place order
+*Interstate travel quarantine
+
+The stay at home order was the first and strongest policy set by many states. This was a drastic policy enacted to limit face to face interactions in hopes that it would slow the spread of the virus. We expect a strong relationship between long stay at home orders and curtailed spread. This was additionally supported by the closing of businesses so there were no places to go. The interstate travel quarantine was another attempt to limit face to face interactions with those who may not follow that state's policies. This variable captures each state's attempt to isolate themselves from other state policies. Finally, we included a variable to describe each state's mask mandate for businesses in order to capture the safety measures taken as states attempted to reopen their economies.
+
+
+We first reviewed the histograms of our new input variables. Aside from the spike at 0 (which indicates states that did not wish to implement this specific policy), the variables look fairly normal.
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#Input Hist 
+input_1<-ggplot(Model_Data, aes(x=population.density.log)) + 
+   geom_histogram(color="black", fill="grey")+
+   ylab('Frequency')+xlab("Log of State's Polulation Density")
+input_2<-ggplot(Model_Data, aes(x=maskB.total)) + 
+   geom_histogram(color="black", fill="grey")+
+   ylab('Frequency')+xlab('Business Mask Mandate (Days in Place)')
+input_3<-ggplot(Model_Data, aes(x=stay.home.total)) + 
+   geom_histogram(color="black", fill="grey")+
+   ylab('Frequency')+xlab(paste('Stay at Home/Shelter in Place Order','\n','(Days in Place)'))
+input_4<-ggplot(Model_Data, aes(x=travel.total)) + 
+   geom_histogram(color="black", fill="grey")+
+   ylab('Frequency')+xlab('Interstate Travel Quarantine (Days in Place)')
+grid.arrange(input_1,input_2,input_3,input_4, nrow=2) 
+```
+
+
+## Model 3
+
+And finally for our most complex model will also account for the number of days each state had:
+*Restaurant Shutdowns
+*Bar Shutdowns
+*Gym Shutdowns 
+*State of Emergency Speed (measured in days from 3/11/2020)
+
+In our final model we choose to include data that more likely supported the information covered in our medium complexity model. For example, the shutting down of restaurants, bar, and gyms made it much easier for the public to comply with the stay at home mandate. If the businesses of the state are closed, where could people congregate? Unfortunately, this may lead to colinearily between the variables. This colinearily may add noise to our model if shutdowns occurred simultaneously or alternatively if shutdowns occurred at the same time as the stay at home order. We expect relationship between long closures and lower infection rates. Finally we attempted to add a variable to capture how quickly a state responded to this crisis. Preemptive policies will lead to less initial cases and therefore initial vectors to spread the disease. This variable is the days between when a state declared a state of emergency in relation to the day the World Health Organization (WHO) declared Covid-19 a pandemic. We expect negative and small numbers (States of Emergency called before or around 3/11/2020) to align with curtailed rates of infection.
+
+
+
+We first reviewed the histograms of our new input variables. The speed of each state's State of Emergency declaration closely aligns to a normal distribution. However each of the shutdown variables displays a slight skew. While not ideal, this skew does not span over factors of tens and therefore we did not feel it appropriate to use a log transformation. 
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+shapiro.test(Model_Data$res1.total)
+
+#Input Hist 
+input_1<-ggplot(Model_Data, aes(x=res1.total)) + 
+   geom_histogram(color="black", fill="grey")+
+   ylab('Frequency')+xlab("Restaurant Shutdowns (Days)")
+input_2<-ggplot(Model_Data, aes(x=bar1.total)) + 
+   geom_histogram(color="black", fill="grey")+
+   ylab('Frequency')+xlab("Bar Shutdowns (Days)")
+input_3<-ggplot(Model_Data, aes(x=gym1.total)) + 
+   geom_histogram(color="black", fill="grey")+
+   ylab('Frequency')+xlab("Gym Shutdowns (Days)")
+input_4<-ggplot(Model_Data, aes(x=state.of.emergency.speed)) + 
+   geom_histogram(color="black", fill="grey")+
+   ylab('Frequency')+xlab('Speed of State of Emergency (Days)')
+grid.arrange(input_1,input_2,input_3,input_4, nrow=2) 
+```
+
+It is noteworthy that the variable describing the speed of State of Emergency Declaration may be negative. This means that the state in question declared a State of Emergency before the WHO declared Covid-19 as a pandemic. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Limitations of your Model 
+
+For each model we will evaluate the assumptions for a Classical Liner Model. These requirements are:
+
+1. Independent and identically distributed data 
+2. Linear Conditional Expectation Exists
+3. No Colinearity
+4. No Homoskedastic Error
+5. Normal Residuals
+
+# Independent and identically distributed data 
+
+The data use in our models represents the number of Covid-19 cases and state level policy decisions for all 50 states of the United States and the District of Columbia. While we can assume the data from each state/district is identically distributed, there may be some difficulty making an argument that the data is independent. There is an argument to be made that the Covid-19 cases in one state may effect an adjacent state. Additionally the policies of one state, a collection of states, or the federal government may have an influencing effect of a state's policy. This lack of independence may explain the skew to the shutdown data. Large populated states such as California and New York began to shut businesses down early and many other smaller states followed suit shortly afterwards.
+
+
+# Linear Conditional Expectation Exists
+To evaluate if the relationship between our input and output variables is indeed linear, we plotted the predicted values against their residuals. 
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+Model_Data <- Model_Data %>%  mutate(model1_res = resid(model1))
+Model_Data <- Model_Data %>% mutate(model1_prd = predict(model1)) 
+
+#Residuals versus Predictors
+Residuals_Plot1 = ggplot(data = Model_Data, aes(x = model1_prd, y = model1_res)) + 
+  geom_point() + stat_smooth(se = TRUE)+
+  ylab('Base Model Residuals')+xlab('Predictors')
+
+
+Model_Data <- Model_Data %>%  mutate(model2_res = resid(model2))
+Model_Data <- Model_Data %>% mutate(model2_prd = predict(model2)) 
+
+#Residuals versus Predictors
+Residuals_Plot2 = ggplot(data = Model_Data, aes(x = model2_prd, y = model2_res)) + 
+  geom_point() + stat_smooth(se = TRUE)+
+  ylab('Medium Complexity Model Residuals')+xlab('Predictors')
+
+
+Model_Data <- Model_Data %>%  mutate(model3_res = resid(model3))
+Model_Data <- Model_Data %>% mutate(model3_prd = predict(model3)) 
+
+#Residuals versus Predictors
+Residuals_Plot3 = ggplot(data = Model_Data, aes(x = model3_prd, y = model3_res)) + 
+  geom_point() + stat_smooth(se = TRUE)+
+  ylab('Complex Model Residuals')+xlab('Predictors')
+
+
+grid.arrange(Residuals_Plot1,Residuals_Plot2,Residuals_Plot3,nrow=2) 
+```
+From the Residual/Predictors plot shown above, one can see that this basic model's predictors has a fairly linear relationship with residuals implying that a Linear Conditional Expectation exists for all models.
+
+# Colinearity
+
+Our base mode cannot possibly have colinearity because it only has one input variable. We evaluated multicollinearity using variance inflation factors for our medium complexity model and complex model. Our medium complexity model's variance inflation factors are particularly small (less than 2) and imply that there is no concern for multicollinearity. However our complex model's variance inflation factors are quite large (several of the Shut Down variables are between 5-9). This implies that there may be multicollinearity. This judgment is subjective. If after reviewing the model coefficients we believe that this potential multicollinearity creates confusion in the model, the solution would be to limit our input variables to one variable to that we believe is representative of all the shut down inputs (for example, the model could include only the restaurant shutdowns instead of restaurant, bar, and gym shutdowns).
+
+# Homoskedastic Error
+
+To evaluate the presence of Homoskedastic Error, we will plot the residuals in relationship to the model's inputs. For our base model, we will plot the base model residuals versus the log transformation of each state's population density.
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+Homoskedastic_Plot = ggplot(data = Model_Data, aes(x = population.density.log, y = model2_res)) + 
+  geom_point() + stat_smooth(se = TRUE)+
+  ylab('Residuals')+xlab("Log(Population Density)")
+Homoskedastic_Plot
+```
+The Residual/Input plot displays a flaring of the standard error at the extremes which implies the potential for Homoskedastic errors. The log transformation of each state's population density and has the same effect in any model built off the base model, therefore we will use robust standard error when reviewing the significance level of all model's coefficients.
+
+# Normal Residuals
+
+Lastly we have a plot of each model's residuals to ensure they are normal. As you can see from the histograms below, the residual's are in fact normally distributed fro all models. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#Histogram of Residuals
+Normal_Residuals1<-ggplot(Model_Data, aes(x=model1_res)) + 
+   geom_histogram(color="black", fill="grey")+
+   ylab('Frequency')+xlab("Base Model Residuals")
+#Histogram of Residuals
+Normal_Residuals2<-ggplot(Model_Data, aes(x=model2_res)) + 
+   geom_histogram(color="black", fill="grey")+
+   ylab('Frequency')+xlab("Medium Complexity Model Residuals")
+#Histogram of Residuals
+Normal_Residuals3<-ggplot(Model_Data, aes(x=model3_res)) + 
+   geom_histogram(color="black", fill="grey")+
+   ylab('Frequency')+xlab("Complex Model Residuals")
+
+grid.arrange(Normal_Residuals1,Normal_Residuals2,Normal_Residuals3,nrow=3) 
+```
+
+
+
+#Other Remarks
+
+Finally it is important to not that our analysis has collapsed this time series data to merely look at one point in time. We have attempted to include variables that are measured in length of days in order to account for the importance of time on this analysis, but this does not counteract the fact that this analysis would be improved by looking at the timing of these policies being implemented.
+
 
 ## Discussion of Omitted Variables
 
