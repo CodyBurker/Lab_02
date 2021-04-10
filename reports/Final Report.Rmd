@@ -154,15 +154,15 @@ model3 = lm(case.log~population.density.log+
 
 \newpage
 
-# Which COVID-19 policies implemented by states have an effect on the statewide initial spread of COVID-19?
+# Which Covid-19 policies implemented by states have an effect on the statewide initial spread of Covid-19?
 ## Introduction
 
-The COVID-19 pandemic is the first pandemic seen in a century, affecting each individual worldwide. While many countries issued lockdowns, travel quarantines, and other COVID-19 restrictions on a federal level, the US federal government placed the power with the governors to regulate the implementation of these restrictions on a state-by-state basis.
+The Covid-19 pandemic is the first pandemic seen in a century, affecting each individual worldwide. While many countries issued lockdowns, travel quarantines, and other Covid-19 restrictions on a federal level, the US federal government placed the power with the governors to regulate the implementation of these restrictions on a state-by-state basis.
 
-There has been increased skepticism on the true effectiveness of restrictions in slowing down the spread of COVID-19, especially due to the amount of economic impact resulting from these procedures. Evaluating which COVID-19 restrictions helped prevent the initial spread of COVID-19 within that state helps citizens understand the importance of following these policies. Understanding the effectiveness of COVID-19 restrictions in slowing the initial spread of the disease also helps policy makers justify the implementation of these policies to their constituents. Additionally, this information might be of interest to public health officials who are looking for best practices to contain a future pandemic or infectious disease.
+There has been increased skepticism on the true effectiveness of restrictions in slowing down the spread of Covid-19, especially due to the amount of economic impact resulting from these procedures. Evaluating which Covid-19 restrictions helped prevent the initial spread of Covid-19 within that state helps citizens understand the importance of following these policies. Understanding the effectiveness of Covid-19 restrictions in slowing the initial spread of the disease also helps policy makers justify the implementation of these policies to their constituents. Additionally, this information might be of interest to public health officials who are looking for best practices to contain a future pandemic or infectious disease.
 
 From this, we are focusing on the following main research question:\
-`Which COVID-19 policies implemented by states have an effect on the statewide initial spread of COVID-19?`\
+`Which Covid-19 policies implemented by states have an effect on the statewide initial spread of Covid-19?`\
 
 As part of our research we will specifically be looking at the following policies implemented by various states:\
 1. Stay at home/shelter in place order length\
@@ -173,10 +173,10 @@ As part of our research we will specifically be looking at the following policie
 6. Bars shutdown length\
 7. Declaration of a state of emergency\
 
-Understanding the nature of COVID-19 as being a highly infectious disease, we believe the first few months are the most crucial times in controlling an outbreak. Thus, we define an `initial spread of COVID-19` to be the number of cases at 05/31/2020. We believe this reflects the initial rise of cases from $0$ to $x$ within the first few crucial months of the pandemic.\
+Understanding the nature of Covid-19 as being a highly infectious disease, we believe the first few months are the most crucial times in controlling an outbreak. Thus, we define an `initial spread of Covid-19` to be the number of cases at 05/31/2020. We believe this reflects the initial rise of cases from $0$ to $x$ within the first few crucial months of the pandemic.\
 
 We used the following data sources:\
-a)  [COVID-19 US State Policy Database](www.tinyurl.com/statepolicies) A database of state policy responses to the pandemic, compiled by researchers at the Boston University School of Public Health.\
+a)  [Covid-19 US State Policy Database](www.tinyurl.com/statepolicies) A database of state policy responses to the pandemic, compiled by researchers at the Boston University School of Public Health.\
 
 We used this data source to get start and end dates to evaluate length in days of policies 1 through 6 listed above and the date a state of emergency was declared to evaluate the speed at which a state of emergency was declared within each state (policy 7). This source additionally provided us with population data by state and population density per square mile by state.\
 
@@ -368,7 +368,7 @@ $$
 $$
 
 
-This model implies that  every percent increase in Population Density (measured in people / square mile) causes a `r model1$coefficients[2] %>% format(digits=2)`% increase in Covid19 Cases per 100,000 people in a state, which has much practical significance. While it is likely not feasible to reduce Population Density, this number might inform policy makers as to which states are more vulnerable to future pandemics. Also, this model has an $R^2$ value of `r format(summary(model1)$r.squared, digits=2)`, it seems as if the transformed population density accounts for a surprising amount of the variance in Log (Covid19 Cases).
+This model implies that  every percent increase in Population Density (measured in people / square mile) causes a `r model1$coefficients[2] %>% format(digits=2)`% increase in Covid-19 Cases per 100,000 people in a state, which has much practical significance. While it is likely not feasible to reduce Population Density, this number might inform policy makers as to which states are more vulnerable to future pandemics. Also, this model has an $R^2$ value of `r format(summary(model1)$r.squared, digits=2)`, it seems as if the transformed population density accounts for a surprising amount of the variance in Log (Covid-19 Cases).
 
 ```{r covid-density-scatter, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Scatterplot of Model1"}
 ggplot(Model_Data, aes(y=case.log, x=population.density.log)) + 
@@ -382,11 +382,11 @@ ggplot(Model_Data, aes(y=case.log, x=population.density.log)) +
 
 For our second model, we find evidence that there is a relationship between how long states took to enact business mask mandates after the pandemic was declared (Business mask Mandate), how long the stay at home order was in place (Stay at home/shelter in place order), and how long the interstate travel quarantine was in place (Interstate Travel Quarantine In Place Length) in addition to the Log (Population Density). The coefficient for Log (Population Density) decreases from 0.358 to 0.329 (but remains significant), indicating that some of its explanatory power is shared between the other variables we have included (and also perhaps there is a small amount of colinearity between this variable and one or more of the others). 
 
-When we inspect the Stay at home/shelter in place order coefficient, we see that it is both significant and negative This indicates that for every extra day that a state spend with a Stay at home/sheter in place order in effect if all else is held equal, we expect to see a `r round(model2$coefficients['stay.home.total'] * -1 *  100,3)`% *decrease* in Covid19 cases. This is a very large number, and because it has a small p-value we are sure that there is a relationship. This speaks strongly to the efficacy of such orders, and the low p-value (`r round(coeftest(model2, vcov=cov2)[4,4],3)`) gives us reason to believe that there is a relatively low chance this relationship exists by chance.
+When we inspect the Stay at home/shelter in place order coefficient, we see that it is both significant and negative This indicates that for every extra day that a state spend with a Stay at home/sheter in place order in effect if all else is held equal, we expect to see a `r round(model2$coefficients['stay.home.total'] * -1 *  100,3)`% *decrease* in Covid-19 cases. This is a very large number, and because it has a small p-value we are sure that there is a relationship. This speaks strongly to the efficacy of such orders, and the low p-value (`r round(coeftest(model2, vcov=cov2)[4,4],3)`) gives us reason to believe that there is a relatively low chance this relationship exists by chance.
 
-Inspection of the Interstate Travel Quarantine In Place Length leads to a similiar result. We see that the p-value is low enough (`r round(coeftest(model2, vcov=cov2)[5,4],3)`) that we should reject the idea that restricting travel does not affect Covid19 cases. The effect size (1 more day of restricting interstate travel leads to `r round(model2$coefficients['travel.total'] * -100,3)`% decrease in Covid19 cases, all else held equal) is nearly as large as the Stay at home/shelter in place order, meaning that they have relatively similar effects on Covid19 cases.
+Inspection of the Interstate Travel Quarantine In Place Length leads to a similiar result. We see that the p-value is low enough (`r round(coeftest(model2, vcov=cov2)[5,4],3)`) that we should reject the idea that restricting travel does not affect Covid-19 cases. The effect size (1 more day of restricting interstate travel leads to `r round(model2$coefficients['travel.total'] * -100,3)`% decrease in Covid-19 cases, all else held equal) is nearly as large as the Stay at home/shelter in place order, meaning that they have relatively similar effects on Covid-19 cases.
 
-When we inspect the Business mask mandate variable, we find something surprising: it is significant, however it is also positive. This is counterintuitive: we would expect that the longer a mandate for business masks is in place, the lower the number of cases. One explanation for this might be reverse causality. Although we assumed that Business mask mandate influenced Log (Covid-19 Cases), it is possible that Log (Covid-19 Cases) also influenced Business mask mandate. For example, as the number of Covid19 cases increased, states lengthened or reenacted their business mask mandates as a result/in reaction to rising cases. This would explain why, according to our model, every 1 days of increased business mask mandate is associated with a `r round(model2$coefficients['maskB.total'] * 100,3)`% increase in Covid19 cases per 100,000 residents.
+When we inspect the Business mask mandate variable, we find something surprising: it is significant, however it is also positive. This is counterintuitive: we would expect that the longer a mandate for business masks is in place, the lower the number of cases. One explanation for this might be reverse causality. Although we assumed that Business mask mandate influenced Log (Covid-19 Cases), it is possible that Log (Covid-19 Cases) also influenced Business mask mandate. For example, as the number of Covid-19 cases increased, states lengthened or reenacted their business mask mandates as a result/in reaction to rising cases. This would explain why, according to our model, every 1 days of increased business mask mandate is associated with a `r round(model2$coefficients['maskB.total'] * 100,3)`% increase in Covid-19 cases per 100,000 residents.
 
 ### Model 3
 
