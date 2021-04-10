@@ -23,7 +23,7 @@ table2 = table2 %>% rename(State.FIPS.Code = fips)
 table3 = inner_join(table2,table1,c("State.FIPS.Code"))
 
 table3_winterOnly = table3 %>% 
-  filter(`date`>="2020-03-01",`date`<"2020-06-01") %>% 
+  filter(`date`>="2020-01-01",`date`<"2020-06-01") %>% 
   mutate(earliest_cases = ifelse(`date`==min(date),cases.x,0)) %>% 
   mutate(latest_cases = ifelse(`date`== max(date),cases.x,0)) %>% 
   group_by(state.x, 
