@@ -1,12 +1,250 @@
 ---
 title: "Research Proposal: How are state policies and population related to the state-wide spread of COVID-19?"
 author: 'Cody Burker, Emily Fernandes, Margo Suryanaga'
-output: pdf_document
+output: bookdown::pdf_document2
 ---
 
-```{r setup, include=FALSE}
+```{r setup&getdata, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(readxl)
+library("data.table")
+library("ggplot2")
+library("lubridate")
+library("dplyr")
+library("zoo")
+library(naniar)
+library(patchwork)
+library(sandwich)
+library(lmtest)
+library(nortest)
+library(HH)
+library(lattice)
+
+calc_num_days <- function(str,end,end.date) {
+   str[str=="NA"] = end.date
+   end[end=="NA"] = end.date
+   
+   
+   end.date = as.Date(end.date)
+   str=as.Date(str)
+   
+   end=as.Date(end)
+   end[end> end.date] = end.date
+
+   ind = end-str
+   
+   ind[ind <= 0] = 0  
+   ind = as.numeric(ind)
+   
+   df <- data.frame (STR  = str,END = end, DIFF = ind)
+   
+  return(ind)
+}
+calc_num_days_n <- function(str,end,end.date) {
+   str[str=="NA"] = end.date
+   end[end=="NA"] = end.date
+   
+   
+   end.date = as.Date(end.date)
+   str=as.Date(str)
+   
+   end=as.Date(end)
+   end[end> end.date] = end.date
+
+   ind = end-str
+   ind = as.numeric(ind)
+   df <- data.frame (STR  = str,END = end, DIFF = ind)
+   print(df)
+   
+  return(ind)
+}
+
+#Collect NYT's Covid-19 Data
+NYT_Data <- fread("https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv")
+NYT_Data
+
+str.date = "2020-01-20"
+end.date = "2020-05-31"
+
+ref.date.list = seq(as.Date(str.date), as.Date(end.date), by="days")
+
+#Treat Dates as Dates
+NYT_Data[,date:=as.Date(date)]
+NYT_Data <- NYT_Data[NYT_Data$date==end.date,]
+
+
+#Collect CUSP Policy Data
+CUSP_Data=read.csv("CUSP_Clean.csv",na.strings = c(0))
+CUSP_Data$state = CUSP_Data$State
+
+
+total_data = merge(NYT_Data, CUSP_Data, by = "state")
+total_data<-total_data[order(total_data$state,total_data$date), ]
+
+date = ref.date.list
+##Create Stay Home Variables 
+str1.stay.home.date = total_data$Stay.at.home.shelter.in.place
+str2.stay.home.date = total_data$Stay.at.home.order.issued.but.did.not.specifically.restrict.movement.of.the.general.public
+str.stay.home.date <- ifelse(str1.stay.home.date=='NA', str2.stay.home.date, str1.stay.home.date)
+
+end.stay.home.date = total_data$End.stay.at.home.shelter.in.place
+#end.stay.home.date[total_data$state=='Kentucky'] = '2020-06-29'   #note indicated this is end date
+#end.stay.home.date[total_data$state=='California'] = '2020-05-08' #changed to be when businesses were allowed to reopen
+#end.stay.home.date[total_data$state=='New Mexico'] = '2020-05-16' #changed to be when businesses were allowed to reopen
+
+
+#Create Indicator and sum days
+total_data$stay.home1.total=calc_num_days(str1.stay.home.date,end.stay.home.date,end.date)
+total_data$stay.home2.total=calc_num_days(str2.stay.home.date,end.stay.home.date,end.date)
+total_data$stay.home.total=calc_num_days(str.stay.home.date,end.stay.home.date,end.date)
+
+##Create Stay Home Variables
+str.school.date = total_data$Closed.K.12.public.schools
+#str.school.date[total_data$state=='Rhode Island'] = '2020-03-16'
+end.school.date = rep( end.date, length(str.school.date))
+#Change RI schools closed https://ballotpedia.org/School_responses_in_Rhode_Island_to_the_coronavirus_(COVID-19)_pandemic_during_the_2020-2021_school_year
+
+
+str.business.date = total_data$Closed.other.non.essential.businesses
+end.business.date = total_data$Reopened.other.non.essential.retail
+end.business.date = total_data$Began.to.reopen.businesses.statewide
+
+#Create Indicator
+total_data$business.total=calc_num_days(str.business.date,end.business.date,end.date)
+total_data$close.school.total=calc_num_days(str.school.date,end.school.date,end.date)
+
+
+##Create Face Mask Variables 
+str.mask1.date = total_data$Public.face.mask.mandate
+str.mask2.date = total_data$Second.mandate.for.facemasks.by.all.individuals.in.public.places
+str.maskB.date = total_data$Business.face.mask.mandate
+str.travel.date.all = total_data$Quarantine.mandate.for.all.travelers
+str.travel.date.some = total_data$Quarantine.mandate.for.some.travelers
+str.travel.date <- ifelse(str.travel.date.all=='NA', str.travel.date.some, str.travel.date.all)
+
+data.frame(total_data$state,str.travel.date.all,str.travel.date.some,str.travel.date )
+
+
+end.mask1.date = total_data$End.face.mask.mandate
+end.mask2.date = rep('NA', length(end.mask1.date))
+end.maskB.date = total_data$End.face.mask.mandate
+end.travel.date = total_data$Quarantine.mandate.ended
+
+#Create Indicator
+total_data$mask1.total=calc_num_days(str.mask1.date,end.mask1.date,end.date)
+total_data$mask2.total=calc_num_days(str.mask2.date,end.mask2.date,end.date)
+total_data$maskB.total=calc_num_days(str.maskB.date,end.maskB.date,end.date)
+total_data$travel.total=calc_num_days(str.travel.date,end.travel.date,end.date)
+
+
+##Create Face Mask Pubishment Variables 
+total_data$mask.fines=total_data$Face.mask.mandate.enforced.by.fines
+total_data$mask.charge=total_data$Face.mask.mandate.enforced.by.criminal.charge.citation
+total_data$mask.no.enforcement=total_data$No.legal.enforcement.of.face.mask.mandate
+
+
+#Round 1
+##Round 1 Variables 
+str.res1.date = total_data$Closed.restaurants
+end.res1.date = total_data$Reopened.restaurants
+
+str.gym1.date = total_data$Closed.gyms
+end.gym1.date = total_data$Reopened.gyms
+
+str.bar1.date = total_data$Closed.bars
+end.bar1.date = total_data$Reopened.bars   
+
+str.movie1.date = total_data$Closed.movie.theaters
+end.movie1.date = total_data$Reopened.movie.theaters
+      
+#Create number of days
+total_data$res1.total=calc_num_days(str.res1.date,end.res1.date,end.date)
+total_data$gym1.total=calc_num_days(str.gym1.date,end.gym1.date,end.date)
+total_data$bar1.total=calc_num_days(str.bar1.date,end.bar1.date,end.date)
+total_data$movie1.total=calc_num_days(str.movie1.date,end.movie1.date,end.date)
+
+#Round 2
+#Closed.restaurants.x2 | Reopened.restaurants.x2
+#Closed.gyms.x2 | Reopened.gyms.x2
+#Closed.bars.x2 | Reopened.bars.x2
+#Closed.movie.theaters.x2 | Reopened.movie.theaters.x2
+
+##Round 2 Variables 
+str.res2.date = total_data$Closed.restaurants.x2
+end.res2.date = total_data$Reopened.restaurants.x2
+
+str.gym2.date = total_data$Closed.gyms.x2
+end.gym2.date = total_data$Reopened.gyms.x2
+
+str.bar2.date = total_data$Closed.bars.x2
+end.bar2.date = total_data$Reopened.bars.x2   
+
+str.movie2.date = total_data$Closed.movie.theaters.x2
+end.movie2.date = total_data$Reopened.movie.theaters.x2
+      
+#Create number of days
+total_data$res2.total=calc_num_days(str.res2.date,end.res2.date,end.date)
+total_data$gym2.total=calc_num_days(str.gym2.date,end.gym2.date,end.date)
+total_data$bar2.total=calc_num_days(str.bar2.date,end.bar2.date,end.date)
+total_data$movie2.total=calc_num_days(str.movie2.date,end.movie2.date,end.date)
+
+#Round 3
+#Closed.restaurants.x3 | Reopened.restaurants.x3
+#Closed.bars.x3 | NA
+
+##Round 3 Variables 
+str.res3.date = total_data$Closed.restaurants.x3
+end.res3.date = total_data$Reopened.restaurants.x3
+
+str.bar3.date = total_data$Closed.bars.x3
+end.bar3.date = rep('NA', length(end.mask1.date))  
+      
+#Create Indicator & total number of days
+total_data$res3.total=calc_num_days(str.res3.date,end.res3.date,end.date)
+total_data$bar3.total=calc_num_days(str.bar3.date,end.bar3.date,end.date)
+
+
+#Include Popluation Data
+total_data$population = as.numeric(total_data$Population.2018)
+total_data$population.density = as.numeric(total_data$Population.density.per.square.mile)
+total_data$cases = as.numeric(total_data$cases)
+   
+#Create Speed Variables
+pandemic_date = rep('2020-03-11', length(end.mask1.date))  
+stayAtHomeSincePandemic = calc_num_days_n(str.stay.home.date, pandemic_date,end.date)
+
+state.of.emergency = total_data$State.of.emergency
+state.of.emergency.speed = calc_num_days_n(state.of.emergency, pandemic_date,end.date)
+
+
+#Transformations
+Model_Data=total_data
+
+Model_Data$case.per.100k = (Model_Data$cases/Model_Data$population)*100000
+Model_Data$case.log = log(Model_Data$case.per.100k)
+Model_Data$population.density.log = log(Model_Data$population.density)
+
+#Base Model
+model1 = lm(case.log~population.density.log, data = Model_Data)
+#Medium Model
+model2 = lm(case.log~population.density.log+
+                      maskB.total+ 
+                      stay.home.total+
+                      travel.total, data = Model_Data)
+#Complex Model
+model3 = lm(case.log~population.density.log+
+                      maskB.total+
+                      stay.home.total+
+                      travel.total+
+                      res1.total+
+                      bar1.total+
+                      gym1.total+ 
+                      stayAtHomeSincePandemic+
+                      state.of.emergency.speed, data = Model_Data)
 ```
+
 
 # Background
 
@@ -29,7 +267,80 @@ From data source (2) we expect to get:\
 # Methodology and Expected outcome
 
 We will investigate the causal effect that various variables have on the 7-day moving average of cumulative COVID-19 cases. We will model the 7-day moving average of cumulative COVID-19 cases as a linear function of:\
-- Closure and reopenings (whether a stay-at-home order was in effect at that time in that state and how many days since it has started) \
+- Closure and reopenings (whether a stay-at-home order was in effect at that time in that state and how many days since it has started)\
 - When mask mandates were required (as an indicator variable, and as how many days since the mandate started)\
 - Whether the state implemented legal consequences for violating stay-at-home orders\
 We will assume that these variables have no effect on COVID-19 cases, and will construct tests to investigate whether a relationship exists.
+
+# Regression Table
+
+Table \@ref(tab:regression) displays the regression of all 3 models. 
+
+
+```{r regression, echo=FALSE, message=FALSE, warning=FALSE, results="asis"}
+# Assumes that the following models are in-memory:
+# model1
+# model2
+# model3
+library(stargazer)
+library(sandwich)
+library(lmtest)
+library(tidyverse)
+
+# Adjust standard errors
+cov1 <- vcovHC(model1)
+rse1 <- sqrt(diag(cov1))
+cov2 <- vcovHC(model2)
+rse2 <- sqrt(diag(cov2))
+cov3 <- vcovHC(model3)
+rse3 <- sqrt(diag(cov3))
+
+# Get new f statistics
+f_stat1 <- waldtest(model1, vcov = cov1)
+f_stat2 <- waldtest(model2, vcov = cov2)
+f_stat3 <- waldtest(model3, vcov = cov3)
+
+# Create string array of modified F statistic
+f_stat_string = c("F-Statistic",
+                        paste(round(f_stat1$F[2],3),"***"," (df = 1; 49)", sep=""),
+                        paste(round(f_stat1$F[2],3),"***"," (df = 5; 45)", sep=""),
+                        paste(round(f_stat3$F[2],3),"***"," (df = 9; 41)", sep="")
+           )
+
+stargazer(model1, model2, model3, type="latex",
+          title = "Regression Table",
+          covariate.labels = c("Log Population Density",
+                               "Business Facemask Length (days)",
+                               "Traveler Quarantine Length (days)",
+                               "Stay at Home Order Length (days)",
+                               "Restaurant Shutdown Length (days)",
+                               "Gym Shutdown Length (days)",
+                               "Bar Shutdown Length (days)"
+                               ),
+          dep.var.labels = c(""),
+          dep.var.caption = "Dependent Variable: Log Covid-19 Cases",
+          column.labels = c("Simple Model","Moderate Model","Complex Model"),
+          se = list(rse1, rse2, rse3),
+          omit.stat = "f",
+          add.lines = list(f_stat_string),
+          header=FALSE,
+          label = "tab:regression"
+)
+```
+## Model 1
+
+We will begin by inspecting the first Model in Table \@ref(tab:regression).
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+ggplot(Model_Data, aes(y=case.log, x=population.density.log)) + 
+  geom_point() + 
+  geom_smooth(method="lm", se = FALSE) + 
+  labs(title = "Model 1: Log Population Density vs Log Covid-19 Cases",
+       x = "Log Population Density" , y = "Log Covid-19 Cases")
+```
+
+## Model 2
+
+## Model 3
