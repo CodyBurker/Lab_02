@@ -159,7 +159,6 @@ model3 = lm(case.log~population.density.log+
                       res1.total+
                       bar1.total+
                       gym1.total+ 
-                      stayAtHomeSincePandemic+
                       state.of.emergency.speed, data = Model_Data)
 ```
 
@@ -184,15 +183,6 @@ From data source (2) we expect to get:\
 
 # Methodology and Expected outcome
 
-We will investigate the causal effect that various variables have on the 7-day moving average of cumulative COVID-19 cases. We will model the 7-day moving average of cumulative COVID-19 cases as a linear function of:\
-- Closure and reopenings (whether a stay-at-home order was in effect at that time in that state and how many days since it has started)\
-- When mask mandates were required (as an indicator variable, and as how many days since the mandate started)\
-- Whether the state implemented legal consequences for violating stay-at-home orders\
-We will assume that these variables have no effect on COVID-19 cases, and will construct tests to investigate whether a relationship exists.
-
-
-
-
 Our team would like to study the initial spread of the Covid-19 virus, from the first case seen in the United States until May 31st. Our goal was to create a series of models to explain the relationship between the various state policies put in place to curtail the spread of the virus and the number of cases observed in each state. In the analysis we will use the following policies as input variables:
 *Business mask mandate (measured in days the policy was in place)
 *Stay at home/shelter in place order (measured in days the policy was in place)
@@ -201,23 +191,82 @@ Our team would like to study the initial spread of the Covid-19 virus, from the 
 *Shutdown declared in relationship to day 
 *State of Emergency declared in relationship to 3-11-2020 (Date that the World Health Organization declared the Covid-19 Pandemic) relationship to 3-11-2020 (Date that the World Health Organization declared the Covid-19 Pandemic)
 
-We understand that the spread of Covid-19 is also influenced by not just state policies, but also by the relative closeness of people within each state. In an effort to capture this, we will also include the population density as an input variable. With these inputs, we hope to explain which state policies were effective at curtailing the initial spread of the Covid-19 virus. 
+We understand that the spread of Covid-19 is also influenced by not just state policies, but also by the relative closeness of people within each state. In an effort to capture this, we will also include the population density as an input variable. With these inputs, we hope to explain which state policies were effective at curtailing the initial spread of the Covid-19 virus. For each model we will evaluate the sssumptions for a Classical Linera Model. These requirements are:
 
-First, we began to explore the number of cases in each state per 100,000 residents. This allowed us to account for the number of cases while equalizing the predicted variable to account for the fact that New York or California will have a much larger number of cases than Alaska simple due to the fact these states have many more residents. 
-```{r predicted var hist, include=FALSE}
+1. I.I.D. 
+2. Linear Conditional Expectation Exists
+3. No Colinearity
+4. No Homoskedastic Error
+5. Normal Residuals
 
+The data use for the following models 
+
+First, we began to explore the number of cases in each state per 100,000 residents. This allowed us to account for the number of cases while equalizing the predicted variable to account for the fact that New York or California will have a much larger number of cases than Alaska simple due to the fact these states have many more residents. After viewing the histogram of the number of cases per state per 100k residents, our team chose to handle the skew of the data by completeing a log transformation. The histogram of the log transformed variable can be seen below.
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+require(gridExtra)
 hist1<-ggplot(Model_Data, aes(x=case.per.100k)) + 
-   geom_histogram(color="black", fill="grey",binwidth=.25)+
-   ylab('Frequency')+xlab('Number of Cases per 100k State Residents')
+   geom_histogram(color="black", fill="grey")+
+   ylab('Frequency')+xlab('Number of Cases per 100k State Residents')+
+   ggtitle('Predicted Variable Histograms')+
+  theme(plot.title = element_text(hjust = 0.5))
 hist2<-ggplot(Model_Data, aes(x=case.log)) + 
-   geom_histogram(color="black", fill="grey",binwidth=.25)+
-   ylab('Frequency')+xlab('Lof of Number of Cases per 100k State Residents')
-
-
+   geom_histogram(color="black", fill="grey")+
+   ylab('Frequency')+xlab('Log of Number of Cases per 100k State Residents')
+grid.arrange(hist1, hist2, nrow=2) 
 ```
 
 
+For our base model, we chose to select the one input variable that was a characteristic of the state and not a policy enacted by the state. We hypothesize that the state's population density is one of the first building blocks to describe the number of cases in that state on May 31st, 2020. Close human contact is how this virus spreads and population density captures the relative closeness of residents in a state. Again, after viewing the initial highly skewed histogram we chose to complete a log transformation of this variable. The transformed histogram can be seen below.
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+hist1<-ggplot(Model_Data, aes(x=population.density)) + 
+   geom_histogram(color="black", fill="grey")+
+   ylab('Frequency')+xlab("State's Polulation Density (People per square mile) ")+
+   ggtitle('Input Variable Histograms')+
+  theme(plot.title = element_text(hjust = 0.5))
+hist2<-ggplot(Model_Data, aes(x=population.density.log)) + 
+   geom_histogram(color="black", fill="grey")+
+   ylab('Frequency')+xlab("Log of State's Polulation Density")
+grid.arrange(hist1, hist2, nrow=2) 
+```
+Our base model will look at the log relationship of each state's cases on May 31st, 2020 per 100k residents with that state's population density. 
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+Model_Data <- Model_Data %>%  mutate(model1_res = resid(model1))
+Model_Data <- Model_Data %>% mutate(model1_prd = predict(model1)) 
 
+#Create a scatterplot with current model's regression line
+Regression_Plot <- ggplot(Model_Data, aes(x = population.density.log, y = case.log)) + 
+      geom_point()+
+      geom_line(data = Model_Data, 
+                aes(x = population.density.log, y = model1_prd))+
+      ggtitle(paste('Relationship of Log(Covid-19 Cases per 100k Residents)',
+                    '\n', 'and Log(Population Density)'))+
+      ylab(paste('Log(Covid-19 Cases', '\n','per 100k Residents)'))+
+      xlab('Log(Population Density)')+geom_point()
+
+#Residuals versus Predictors
+Residuals_Plot = ggplot(data = Model_Data, aes(x = model1_prd, y = model1_res)) + 
+  geom_point() + stat_smooth(se = TRUE)+
+  ylab('Base Model Residuals')+xlab('Predictors')
+
+#Histogram of Residuals
+Normal_Residuals<-ggplot(Model_Data, aes(x=model1_res)) + 
+   geom_histogram(color="black", fill="grey")+
+   ylab('Frequency')+xlab("Base Model Residuals")
+
+grid.arrange(Regression_Plot, Residuals_Plot,nrow=2) 
+```
+From the Residual/Predictors plot shown above, one can see that this basic model's predictors has a fairly linear relationship with residuals implying that a Linear Conditional Expectation exists. Colinearlity cannot exist for this base model because we only have 1 input variable. The Residual/Predictors plot displays a flaring of the standard error at the extremes which implies the potential for Homoskedastic errors, therefore we will use robust standard error when reviewing the significance level of this model's coefficients. Lastly we have a plot of the basic model's residuals to ensure they are normal. As you can see from the histogram below, the residual's are in fact normally distributed. 
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#shapiro.test(Model_Data$model1_res)
+Normal_Residuals
+```
+
+For our next model, we chose to build off the basic model while adding several inputs to represent key state policies. This next model will also account for the number of days each state had a:
+*Business mask mandate
+*Stay at home/shelter in place order
+*Interstate travel quarantine
+
+We first 
 
 
 
