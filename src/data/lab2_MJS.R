@@ -164,7 +164,8 @@ model3 = lm(formula = inc_cases_log ~ Population_density_log +
               schoolLength +
               barsLength+
               stayAtHomeSincePandemic +
-              stateOfEmergencySpeed,
+              stateOfEmergencySpeed + 
+              stayAtHomeLength,
             data = table3_winterOnly)
 summary(model3)
 

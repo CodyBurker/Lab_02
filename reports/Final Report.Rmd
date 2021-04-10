@@ -68,10 +68,6 @@ rse2 <- sqrt(diag(cov2))
 cov3 <- vcovHC(model3)
 rse3 <- sqrt(diag(cov3))
 
-se_1 <- coeftest(model1,vcov. = cov1)
-se_2 <- coeftest(model2,vcov. = cov2)
-se_3 <- coeftest(model3,vcov. = cov3)
-
 # Get new f statistics
 f_stat1 <- waldtest(model1, vcov = cov1)
 f_stat2 <- waldtest(model2, vcov = cov2)
