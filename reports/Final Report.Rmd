@@ -346,7 +346,7 @@ stargazer(model1, model2, model3, type="latex",
           covariate.labels = c("Log (Population Density)",
                                "Business mask mandate (days)",
                                "Stay at home/shelter in place order (days)",
-                               "Interstate Travel Quarantine In Place Length (days)",
+                               "Interstate Travel Quarantine (days)",
                                "Restaurant Shutdown Length (days)",
                                "Bar Shutdown Length (days)",
                                "Gym Shutdown Length (days)",
@@ -532,4 +532,4 @@ If the team has taken up an explanatory (i.e. causal) question to evaluate, then
 
 ## Conclusion
 
-Make sure that you end your report with a discussion that distills key insights from your estimates and addresses your research question.
+Our research has confirmed our suspicion that popultion density has an effect on Covid-19 spread ($R^2=0.39$). Furthermore, we were able to detect a relationship between key actions taken at the state-level, and Covid-19 spread. We found that Stay at home/shelter in place orders and Interstate Travel Quarantines both led to lower Covid-19 rates (`r round(model2$coefficients['stay.home.total'] *   100,3)`% per day and `r round(model2$coefficients['travel.total'] *   100,3)`% per day, respectively). However we found that longer Business Mask Mandates were associated with *higher* Covid-19 rates (`r round(model2$coefficients['maskB.total'] *  100,3)`% increase in cases per 100k people per day). This could mean that longer mask mandates led to higher Covid-19 rates, but it could also be due to reverse-causality bias (states put longer policies in place as a response to higher Covid-19 rates). This would bias the coefficient towards zero, indicating that the true effect might be zero or even negative (Business Mask Mandates might actually lower Covid-19 rates). 
