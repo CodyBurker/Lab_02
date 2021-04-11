@@ -204,12 +204,12 @@ First, we began to explore the number of cases in each state per 100,000 residen
 require(gridExtra)
 hist1<-ggplot(Model_Data, aes(x=case.per.100k)) + 
    geom_histogram(color="black", fill="grey")+
-   ylab('Frequency')+xlab('Number of Cases per 100k State Residents')+
-   ggtitle('Predicted Variable Histograms')+
+   ylab('Frequency')+xlab('Cases/100k Residents')+
+   # ggtitle('Predicted Variable Histograms')+
   theme(plot.title = element_text(hjust = 0.5))
 hist2<-ggplot(Model_Data, aes(x=case.log)) + 
    geom_histogram(color="black", fill="grey")+
-   ylab('Frequency')+xlab('Log of Number of Cases per 100k State Residents')
+   ylab('Frequency')+xlab('Log Cases/ 100k Residents')
 grid.arrange(hist1, hist2, nrow=1) 
 ```
 
@@ -222,8 +222,9 @@ For our base model, we selected the one dependent variable that was a characteri
 hist1<-ggplot(Model_Data, aes(x=population.density)) + 
    geom_histogram(color="black", fill="grey")+
    ylab('Frequency')+xlab("State Polulation Density (People/sq mile) ")+
-   ggtitle('Input Variable Histograms')+
-  theme(plot.title = element_text(hjust = 0.5))
+   # ggtitle('Input Variable Histograms')+
+  theme(plot.title = element_text(hjust = 0.5)) + 
+   theme(axis.text.x=element_text(hjust=0.95,vjust=0.2))
 hist2<-ggplot(Model_Data, aes(x=population.density.log)) + 
    geom_histogram(color="black", fill="grey")+
    ylab('Frequency')+xlab("Log of State's Polulation Density")
