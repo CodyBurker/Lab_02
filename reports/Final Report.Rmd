@@ -427,7 +427,7 @@ Model_Data <- Model_Data %>% mutate(model1_prd = predict(model1))
 #Residuals versus Predictors
 Residuals_Plot1 = ggplot(data = Model_Data, aes(x = model1_prd, y = model1_res)) + 
   geom_point() + stat_smooth(se = TRUE)+
-  ylab('Base Model Residuals')+xlab('Predictors')
+  ylab('Base Model Residuals')+xlab('Predicted Values')
 
 
 Model_Data <- Model_Data %>%  mutate(model2_res = resid(model2))
@@ -436,7 +436,7 @@ Model_Data <- Model_Data %>% mutate(model2_prd = predict(model2))
 #Residuals versus Predictors
 Residuals_Plot2 = ggplot(data = Model_Data, aes(x = model2_prd, y = model2_res)) + 
   geom_point() + stat_smooth(se = TRUE)+
-  ylab('Medium Model Residuals')+xlab('Predictors')
+  ylab('Medium Model Residuals')+xlab('Predicted Values')
 
 
 Model_Data <- Model_Data %>%  mutate(model3_res = resid(model3))
@@ -445,7 +445,7 @@ Model_Data <- Model_Data %>% mutate(model3_prd = predict(model3))
 #Residuals versus Predictors
 Residuals_Plot3 = ggplot(data = Model_Data, aes(x = model3_prd, y = model3_res)) + 
   geom_point() + stat_smooth(se = TRUE)+
-  ylab('Complex Model Residuals')+xlab('Predictors')
+  ylab('Complex Model Residuals')+xlab('Predicted Values')
 
 
 grid.arrange(Residuals_Plot1,Residuals_Plot2,Residuals_Plot3,nrow=2) 
