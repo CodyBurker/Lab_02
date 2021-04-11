@@ -221,13 +221,13 @@ For our base model, we selected the one dependent variable that was a characteri
 ```{r densitytransform, echo=FALSE, message=FALSE, warning=FALSE, fig.height=3, fig.cap="Log Transform of Population Density"}
 hist1<-ggplot(Model_Data, aes(x=population.density)) + 
    geom_histogram(color="black", fill="grey")+
-   ylab('Frequency')+xlab("State Polulation Density (People/sq mile) ")+
+   ylab('Frequency')+xlab("State Population Density (People/sq mile) ")+
    # ggtitle('Input Variable Histograms')+
   theme(plot.title = element_text(hjust = 0.5)) + 
    theme(axis.text.x=element_text(hjust=0.95,vjust=0.2))
 hist2<-ggplot(Model_Data, aes(x=population.density.log)) + 
    geom_histogram(color="black", fill="grey")+
-   ylab('Frequency')+xlab("Log of State's Polulation Density")
+   ylab('Frequency')+xlab("Log of State's Population Density")
 grid.arrange(hist1, hist2, nrow=1)
 ```
 
@@ -252,7 +252,7 @@ We first reviewed the histograms of our new input variables, as shown in Figure 
 #Input Hist 
 input_1<-ggplot(Model_Data, aes(x=population.density.log)) + 
    geom_histogram(color="black", fill="grey")+
-   ylab('Frequency')+xlab("Log of State's Polulation Density")
+   ylab('Frequency')+xlab("Log of State's Population Density")
 input_2<-ggplot(Model_Data, aes(x=maskB.total)) + 
    geom_histogram(color="black", fill="grey")+
    ylab('Frequency')+xlab('Business Mask Mandate (Days in Place)')
