@@ -530,6 +530,7 @@ Normal_Residuals3<-ggplot(Model_Data, aes(x=model3_res)) +
 
 Finally it is important to not that our analysis has collapsed this time series data to merely look at one point in time. We have attempted to include variables that are measured in length of days in order to account for the importance of time on this analysis, but this does not counteract the fact that this analysis would be improved by looking at the timing of these policies being implemented.
 
+Additionally, our variables capture the length of time a mandate was in place, but not necessarily how effectively the mandate was enforced. For example, it is possible a state implemented an interstate travel quarantine but did not have the required infrastructure to enforce it. This means that we may not be capturing the effects of an interstate travel quarantine, but instead the effect of a state declaring an interstate travel quarantine.
 
 ## Discussion of Omitted Variables
 
