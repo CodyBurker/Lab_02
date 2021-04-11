@@ -498,7 +498,7 @@ grid.arrange(Homoskedastic_Plot1,Homoskedastic_Plot2,Homoskedastic_Plot3,Homoske
 ```
 
 
-The Residual/Input plot for the log of the population density still displays a flaring of the standard error at the extremes, as shown in Figure \@ref(fig:homoskedastic_medium). The business mask mandate and interstate travel quarantine also display inconsistent standard errors. These factors suggest the potential for Homoskedastic errors. To mitigate this, we will use robust standard error when reviewing the significance level of medium complexity model's coefficients.
+The Residual/Input plot for the log of the population density still displays a flaring of the standard error at the extremes, as shown in Figure 7. The business mask mandate and interstate travel quarantine also display inconsistent standard errors. These factors suggest the potential for Homoskedastic errors. To mitigate this, we will use robust standard error when reviewing the significance level of medium complexity model's coefficients.
 
 The log transformation of each state's population density also effects the complex model (suggesting Homoskedastic error), therefore we will use robust standard error when reviewing the significance level of all model's coefficients.
 
