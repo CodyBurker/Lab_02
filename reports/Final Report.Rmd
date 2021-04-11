@@ -465,7 +465,9 @@ For our medium complexity model, we will plot the residuals in relationship to t
 -   Stay at home/shelter in place order (days in place)
 -   Interstate travel quarantine (days in place)
 
-```{r homoskedastic_medium, echo=FALSE, message=FALSE,  fig.cap="Homoskedastic Plots for Medium Complex Model", warning=FALSE, fig.height=3}
+
+
+```{r hokmoskedasticmedium, echo=FALSE, fig.cap="Homoskedastic Plots for Medium Complex Model", fig.height=3, message=FALSE, warning=FALSE}
 Homoskedastic_Plot1 = ggplot(data = Model_Data, aes(x = population.density.log, y = model2_res)) + 
   geom_point() + stat_smooth(se = TRUE)+
   ylab('Residuals')+xlab('Log (Population Density)')
@@ -481,7 +483,9 @@ Homoskedastic_Plot4 = ggplot(data = Model_Data, aes(x = travel.total, y = model2
 grid.arrange(Homoskedastic_Plot1,Homoskedastic_Plot2,Homoskedastic_Plot3,Homoskedastic_Plot4,nrow=2) 
 ```
 
-The Residual/Input plot for the log of the population density still displays a flaring of the standard error of the resiudals at the extremes, as shown in Figure 7. The business mask mandate and interstate travel quarantine also display inconsistent standard errors. These factors suggest the potential for heteroskedastic errors. To mitigate this, we will use robust standard error when reviewing the significance level of medium complexity model's coefficients.
+
+
+The Residual/Input plot for the log of the population density still displays a flaring of the standard error of the resiudals at the extremes, as shown in Figure \@ref(fig:hokmoskedasticmedium). The business mask mandate and interstate travel quarantine also display inconsistent standard errors. These factors suggest the potential for heteroskedastic errors. To mitigate this, we will use robust standard error when reviewing the significance level of medium complexity model's coefficients.
 
 The log transformation of each state's population density also affects the complex model (suggesting heteroskedastic error), therefore we will use robust standard error when reviewing the significance level of all model's coefficients.
 
