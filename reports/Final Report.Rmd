@@ -21,7 +21,45 @@ library(lmtest)
 library(nortest)
 library(HH)
 library(lattice)
+library(stargazer)
+```
 
+
+
+
+\newpage
+
+# Introduction
+
+The Covid-19 pandemic is the first pandemic seen in a century, affecting each individual worldwide. While many countries issued lockdowns, travel quarantines, and other Covid-19 restrictions on a federal level, the US federal government placed the power with the governors to regulate the implementation of these restrictions on a state-by-state basis.
+
+There has been increased skepticism on the true effectiveness of restrictions in slowing down the spread of Covid-19, especially due to the amount of economic impact resulting from these procedures. Evaluating which Covid-19 restrictions helped prevent the initial spread of Covid-19 within that state helps citizens understand the importance of following these policies. Understanding the effectiveness of Covid-19 restrictions in slowing the initial spread of the disease also helps policy makers justify the implementation of these policies to their constituents. Additionally, this information might be of interest to public health officials who are looking for best practices to contain a future pandemic or infectious disease.
+
+From this, we are focusing on the following main research question:
+`Which Covid-19 policies implemented by states have an effect on the statewide initial spread of Covid-19?`
+
+As part of our research we will specifically be looking at the following policies implemented by various states:
+1. Stay at home/shelter in place order length
+2. Face mask mandate specifically for businesses length
+3. Interstate travel quarantine length
+4. Restaurant shutdown length
+5. Gyms shutdown length
+6. Bars shutdown length
+7. Declaration of a state of emergency
+
+Understanding the nature of Covid-19 as being a highly infectious disease, we believe the first few months are the most crucial times in controlling an outbreak. Thus, we define an `initial spread of Covid-19` to be the number of cases at 05/31/2020. We believe this reflects the initial rise of cases from $0$ to $x$ within the first few crucial months of the pandemic.
+
+We used the following data sources:
+a) [Covid-19 US State Policy Database](www.tinyurl.com/statepolicies) A database of state policy responses to the pandemic, compiled by researchers at the Boston University School of Public Health.
+
+We used this data source to get start and end dates to evaluate length in days of policies 1 through 6 listed above and the date a state of emergency was declared to evaluate the speed at which a state of emergency was declared within each state (policy 7). This source additionally provided us with population data by state and population density per square mile by state.
+
+b)  [NY Times Covid-19 Data Repository](https://github.com/nytimes/covid-19-data) A series of data files with cumulative counts of coronavirus cases in the United States, at the state and county level, over time.
+
+We used this data source to get the number of cases at 05/31/2020 on a state level.
+
+```{r Initial data cleaning, include=FALSE}
+# Initial data capture and cleansing
 calc_num_days <- function(str,end,end.date) {
    str[str=="NA"] = end.date
    end[end=="NA"] = end.date
@@ -127,77 +165,33 @@ total_data$cases = as.numeric(total_data$cases)
 pandemic_date = rep('2020-03-11', length(str.stay.home.date))  
 state.of.emergency = total_data$State.of.emergency
 state.of.emergency.speed = calc_num_days_n(state.of.emergency, pandemic_date,end.date)
-
-#Transformations
-Model_Data=total_data
-Model_Data$case.per.100k = (Model_Data$cases/Model_Data$population)*100000
-Model_Data$case.log = log(Model_Data$case.per.100k)
-Model_Data$population.density.log = log(Model_Data$population.density)
-
-#Base Model
-model1 = lm(case.log~population.density.log, data = Model_Data)
-#Medium Model
-model2 = lm(case.log~population.density.log+
-                      maskB.total+ 
-                      stay.home.total+
-                      travel.total, data = Model_Data)
-#Complex Model
-model3 = lm(case.log~population.density.log+
-                      maskB.total+
-                      stay.home.total+
-                      travel.total+
-                      res1.total+
-                      bar1.total+
-                      gym1.total+ 
-                      state.of.emergency.speed, data = Model_Data)
 ```
-
-\newpage
-
-# Introduction
-
-The Covid-19 pandemic is the first pandemic seen in a century, affecting each individual worldwide. While many countries issued lockdowns, travel quarantines, and other Covid-19 restrictions on a federal level, the US federal government placed the power with the governors to regulate the implementation of these restrictions on a state-by-state basis.
-
-There has been increased skepticism on the true effectiveness of restrictions in slowing down the spread of Covid-19, especially due to the amount of economic impact resulting from these procedures. Evaluating which Covid-19 restrictions helped prevent the initial spread of Covid-19 within that state helps citizens understand the importance of following these policies. Understanding the effectiveness of Covid-19 restrictions in slowing the initial spread of the disease also helps policy makers justify the implementation of these policies to their constituents. Additionally, this information might be of interest to public health officials who are looking for best practices to contain a future pandemic or infectious disease.
-
-From this, we are focusing on the following main research question:\
-`Which Covid-19 policies implemented by states have an effect on the statewide initial spread of Covid-19?`\
-
-As part of our research we will specifically be looking at the following policies implemented by various states:\
-1. Stay at home/shelter in place order length\
-2. Face mask mandate specifically for businesses length\
-3. Interstate travel quarantine length\
-4. Restaurant shutdown length\
-5. Gyms shutdown length\
-6. Bars shutdown length\
-7. Declaration of a state of emergency\
-
-Understanding the nature of Covid-19 as being a highly infectious disease, we believe the first few months are the most crucial times in controlling an outbreak. Thus, we define an `initial spread of Covid-19` to be the number of cases at 05/31/2020. We believe this reflects the initial rise of cases from $0$ to $x$ within the first few crucial months of the pandemic.\
-
-We used the following data sources:\
-a) [Covid-19 US State Policy Database](www.tinyurl.com/statepolicies) A database of state policy responses to the pandemic, compiled by researchers at the Boston University School of Public Health.\
-
-We used this data source to get start and end dates to evaluate length in days of policies 1 through 6 listed above and the date a state of emergency was declared to evaluate the speed at which a state of emergency was declared within each state (policy 7). This source additionally provided us with population data by state and population density per square mile by state.\
-
-b)  [NY Times Covid-19 Data Repository](https://github.com/nytimes/covid-19-data) A series of data files with cumulative counts of coronavirus cases in the United States, at the state and county level, over time.\
-
-We used this data source to get the number of cases at 05/31/2020 on a state level.\
 
 # Model Building
 
-Our team is studying the factors that limited the initial spread of the Covid-19 virus, from the first case seen in the United States until May 31st. Our goal is to create a series of models to explain the relationship between the various state policies put in place to curtail the spread of the virus and the number of cases observed in each state. In the analysis we will use the following policies as independent variables:
+To best answer our research question, we created a series of models to explain the relationship between the various state policies put in place to curtail the spread of the virus and the number of cases observed in each state. Throughout our analysis we will address the 7 policies we list in `Introduction` as the following independent variables:
 
 1.  Business mask mandate (measured in days the policy was in place)
 2.  Stay at home/shelter in place order (measured in days the policy was in place)
 3.  Interstate travel quarantines (measured in days the policy was in place)
-4.  Restaurant/Bar/Gym Shutdowns (measured in days the policy was in place)
-5.  State of Emergency declared in relationship to 3-11-2020 (Date that the World Health Organization declared the Covid-19 Pandemic)
+4.  Restaurant Shutdowns (measured in days the policy was in place)
+5.  Bar Shutdowns (measured in days the policy was in place)
+6.  Gym Shutdowns (measured in days the policy was in place)
+7.  State of Emergency declared in relationship to 3-11-2020 (Date that the World Health Organization declared the Covid-19 Pandemic)
 
-The spread of Covid-19 is not just influenced by state policies, but also by the relative closeness of people within each state. In an effort to capture this, we will also include the population density as an independent variable. With these variables, we hope to explain which state policies were effective at curtailing the initial spread of the Covid-19 virus.
+The spread of Covid-19 is not just influenced by state policies, but also through person-to-person contact within each state. In an effort to capture this, we will also include the population density as an independent variable. With these variables, we hope to explain which state policies were effective at curtailing the initial spread of the Covid-19 virus.
+
+```{r}
+# Variable Transformations
+Model_Data=total_data
+Model_Data$case.per.100k = (Model_Data$cases/Model_Data$population)*100000
+Model_Data$case.log = log(Model_Data$case.per.100k)
+Model_Data$population.density.log = log(Model_Data$population.density)
+```
 
 ## Model 1
 
-First, we began to explore the number of cases in each state per 100,000 residents, which is our dependent variable. This allowed us to account for the number of cases while accounting for the population of each state. For example, New York or California will have a much larger number of cases than Alaska simple due to the fact these states have many more residents. After viewing the histogram of the number of cases per state per 100k residents, our team chose to reduce the skew of the data by applying a log transformation. The histogram of the log transformed variable can be seen in Figure \@ref(fig:casesvslog).
+First, we began to explore the number of cases in each state per 100,000 residents, which is our dependent variable. This allowed us to account for the number of cases while accounting for the population of each state. For example, we expect New York and California to have a much larger number of cases than Alaska simply due to these states having many more residents. After viewing the histogram of the number of cases per state per 100,000 residents, our team chose to reduce the skew of the data by applying a log transformation to this variable. The histogram of the log transformed variable can be seen in Figure \@ref(fig:casesvslog).
 
 ```{r casesvslog, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Log Transform of Dependent Variable", fig.height=3}
 require(gridExtra)
@@ -208,11 +202,11 @@ hist1<-ggplot(Model_Data, aes(x=case.per.100k)) +
   theme(plot.title = element_text(hjust = 0.5))
 hist2<-ggplot(Model_Data, aes(x=case.log)) + 
    geom_histogram(color="black", fill="grey")+
-   ylab('Frequency')+xlab('Log Cases/ 100k Residents')
+   ylab('Frequency')+xlab('Log transform of Cases/ 100k Residents')
 grid.arrange(hist1, hist2, nrow=1) 
 ```
 
-For our base model, we selected the one dependent variable that was a characteristic of the state and not a policy enacted by the state. We hypothesized the state's population density is the first building block to describe the number of Covid-19 cases on May 31st, 2020. This virus spreads thought close human contact and population density captures the relative closeness of residents in a state. Again, after viewing the initial highly skewed histogram we chose to complete a log transformation of this variable. The transformed histogram can be seen in Figure \@ref(fig:densitytransform).
+For our base model, we selected the one independent variable that was a characteristic of the state and not a policy enacted by the state. We believe a state's population density can be used to represent the largest transmitter of Covid-19, direct person-to-person contact. Therefore, we hypothesize the state's population density is the first building block in describing the number of Covid-19 cases on 05/31/2020. Again, after viewing the initial highly skewed histogram we chose to perform a log transformation on this variable. The transformed histogram can be seen in Figure \@ref(fig:densitytransform).
 
 ```{r densitytransform, echo=FALSE, message=FALSE, warning=FALSE, fig.height=3, fig.cap="Log Transform of Population Density"}
 hist1<-ggplot(Model_Data, aes(x=population.density)) + 
@@ -227,22 +221,27 @@ hist2<-ggplot(Model_Data, aes(x=population.density.log)) +
 grid.arrange(hist1, hist2, nrow=1)
 ```
 
-Our base model will look at the relationship of the natural log of each state's cases on May 31st, 2020 per 100k residents with the natural log of state's population density.
+Our base model looks at the relationship of the natural log of each state's cases on 05/31/2020 per 100,000 residents with the natural log of state's population density.
+
+```{r}
+#Base Model
+model1 = lm(case.log~population.density.log, data = Model_Data)
+```
 
 ## Model 2
 
-For our next model, we built off the basic model and added several independent variables to represent key state policies. This medium complexity model will account for the number of days each state had a:
+For our next model, we added three independent variables representing key state policies to our base model. This medium complexity model will account for the number of days each state had a:
 
--   Business mask mandate
 -   Stay at home/shelter in place order
 -   Interstate travel quarantine
+-   Business mask mandate
 
-The stay at home order was the first and strongest policy set by many states. This was a drastic policy enacted to limit face-to-face interactions in hopes that it would slow the spread of the virus. We expect a strong relationship between long stay at home orders and curtailed spread. The interstate travel quarantine was another attempt to limit face to face interactions with those who may not follow that state's policies. This variable captures each state's attempt to isolate themselves from other state policies. Finally, we included a variable to describe each state's mask mandate for businesses in order to capture the safety measures taken as states attempted to reopen their economies.
+The stay at home order was the first and strongest policy set by many states. This was a drastic policy enacted to limit direct contact between people in the hopes that it would slow the spread of Covid-19. We expect a strong relationship between lengthier stay at home orders and curtailed spread. The interstate travel quarantine was another attempt to limit direct contact with visitors from other states (especially those who may have been subject to less restrictive policies). Our final additional independent variable describes the length of each state's face mask mandate for businesses in order to capture the safety measures taken as states attempted to reopen their economies.
 
-We first reviewed the histograms of our new input variables, as shown in Figure \@ref(fig:model2variables). Aside from the spike at zero (which indicates states that did not wish to implement this specific policy), the variables look fairly normal. Therefor our team did not opt to implement any type of variable transformation.
+The histograms of our three new input variables show distributions which are in line with our expectations, as can be seen in Figure \@ref(fig:model2variables). We did notice a spike within all three distributions at zero but we attribute this to states that did not wish to implement this specific policy. Hence our team did not opt to implement any type of variable transformation.
 
 ```{r model2variables, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Model 2 Independent Variables", fig.height=4}
-#Input Hist 
+#Input Histograms 
 input_1<-ggplot(Model_Data, aes(x=population.density.log)) + 
    geom_histogram(color="black", fill="grey")+
    ylab('Frequency')+xlab("Log of State's Population Density")
@@ -258,17 +257,27 @@ input_4<-ggplot(Model_Data, aes(x=travel.total)) +
 grid.arrange(input_1,input_2,input_3,input_4, nrow=2) 
 ```
 
+```{r}
+#Medium Model
+model2 = lm(case.log~population.density.log+
+                      maskB.total+ 
+                      stay.home.total+
+                      travel.total, data = Model_Data)
+```
+
 ## Model 3
 
-And finally for our most complex model, we will account for the number of days each state had:
+And finally for our most complex model, we additionally account for the number of days each state had:
 
 -   Restaurant Shutdowns
 -   Bar Shutdowns
 -   Gym Shutdowns
 
-We have also included a variable to account for the speed each state declared a State of Emergency. This variable is the number of days between the declared State of Emergency and the day the WHO declared Covid-19 a pandemic (3/11/2020).
+We have also included a variable to account for the speed each state declared a State of Emergency. This variable is the number of days between the declared State of Emergency and the day the World Health Organization (WHO) declared Covid-19 a pandemic (3/11/2020).
 
-In our final model we included data that supported the policies covered in our medium complexity model. For example, the shutting down of restaurants, bar, and gyms made it much easier for the public to comply with the stay at home mandate. If the businesses of the state are closed, where will people congregate? Unfortunately, this may lead to colinearily between the variables. This colinearily could add noise to our model if shutdowns occurred simultaneously or if shutdowns occurred at the same time as the stay at home order. We expect a relationship between long closures and lower infection rates. Finally we attempted to add a variable to capture how quickly a state responded to this crisis. Preemptive policies will lead to fewer initial cases and therefore fewer initial vectors to spread the disease. This variable represents the days between when a state declared a state of emergency in relation to the day the World Health Organization (WHO) declared Covid-19 a pandemic. We expect negative or small number of days (States of Emergency called before or around 3/11/2020) to align with lower infection rates.
+In our final model we included data that further supported the policies covered in our medium complexity model. For example, the shutting down of restaurants, bars, and gyms made it much easier for the public to comply with the stay at home mandate. After all, if all the public spaces within the state are closed, where will people congregate? Unfortunately, this may also lead to multicolinearity between the variables, adding noise to our model if shutdowns occurred simultaneously or if shutdowns occurred at the same time as the stay at home order. We expect a relationship between longer shutdowns and lower infection rates. 
+
+We also added an independent variable to capture how quickly a state responded to this crisis. Preemptive policies will lead to fewer initial cases and therefore fewer initial vectors to spread the disease. This variable represents the number of days between when a state declared a state of emergency and the day the WHO declared Covid-19 a pandemic. It is noteworthy that the variable describing the speed of State of Emergency Declaration may be negative. This means that the state in question declared a State of Emergency before the WHO officially declared Covid-19 a pandemic. We expect a negative or small number of days (States of Emergency called before or around 3/11/2020) will align with lower infection rates.
 
 We reviewed the histograms of our new input variables, as seen in Figure \@ref(fig:model3hists). The speed of each state's State of Emergency declaration closely aligns to a normal distribution. However each of the shutdown variables displays a slight skew. While not ideal, this skew does not span over factors of tens and therefore we did not feel it appropriate to use a log transformation.
 
@@ -289,7 +298,17 @@ input_4<-ggplot(Model_Data, aes(x=state.of.emergency.speed)) +
 grid.arrange(input_1,input_2,input_3,input_4, nrow=2) 
 ```
 
-It is noteworthy that the variable describing the speed of State of Emergency Declaration may be negative. This means that the state in question declared a State of Emergency before the WHO declared Covid-19 as a pandemic.
+```{r}
+#Complex Model
+model3 = lm(case.log~population.density.log+
+                      maskB.total+
+                      stay.home.total+
+                      travel.total+
+                      res1.total+
+                      bar1.total+
+                      gym1.total+ 
+                      state.of.emergency.speed, data = Model_Data)
+```
 
 # Regression Table
 
@@ -302,10 +321,6 @@ Table \@ref(tab:regression) displays the regression of all 3 models. We used rob
 # model1
 # model2
 # model3
-library(stargazer)
-library(sandwich)
-library(lmtest)
-library(tidyverse)
 
 # Adjust standard errors
 cov1 <- vcovHC(model1)
@@ -356,13 +371,13 @@ stargazer(model1, model2, model3, type="latex",
 
 ## Model 1
 
-We will begin by inspecting the first Model in Table \@ref(tab:regression). Here we see a significant relationship between Log (Population Density) and Log (Covid-19 Cases). Figure \@ref(fig:covid-density-scatter) displays a scatterplot of the two, and we do see some relationship. The coeffeficient is positive, indicating that a higher density is related to a larger number of Covid-19 cases per 100,000 people in a state. Because (using robust standard errors) this relationship is significant (p \< 0.001) we reject the hypothesis that there is no relationship between Log (Population Density) and Log(Covid-19 Cases) in favor of the hypothesis that there is a relationship. The following model was used to test the relationship between the two variables:
+We will begin by inspecting the first Model in Table \@ref(tab:regression). Here we see a significant relationship between Log (Population Density) and Log (Covid-19 Cases). Figure \@ref(fig:covid-density-scatter) displays a scatterplot of the two, and we do see some relationship exists. The coefficient is positive, indicating that a greater population density is related to a larger number of Covid-19 cases per 100,000 people within a state. Because (using robust standard errors) this relationship is significant (p \< 0.001) we reject the hypothesis that there is no relationship between Log (Population Density) and Log(Covid-19 Cases) in favor of the hypothesis that there is a relationship. The following model was used to test the relationship between the two variables:
 
 $$
 \log (\text{Covid-19 Cases}) = \beta_0 + \beta_1 \log (\text{Population Density}) \\
 $$
 
-This model implies that every percent increase in Population Density (measured in people / square mile) causes a `r model1$coefficients[2] %>% format(digits=2)`% increase in Covid-19 Cases per 100,000 people in a state, which has much practical significance. While it is likely not feasible to reduce Population Density, this number might inform policy makers as to which states are more vulnerable to future pandemics. Also, this model has an $R^2$ value of `r format(summary(model1)$r.squared, digits=2)`, it seems as if the transformed population density accounts for a surprising amount of the variance in Log (Covid-19 Cases).
+This model implies that every percent increase in Population Density (measured in people / square mile) causes a `r model1$coefficients[2] %>% format(digits=2)`% increase in Covid-19 Cases per 100,000 people in a state. This translates to have great practical significance when we look at a state-by-state comparison. While it is likely not feasible to reduce Population Density, this number might inform policy makers as to which states are more vulnerable to future pandemics. Furthermore, this model has an $R^2$ value of `r format(summary(model1)$r.squared, digits=2)`, indicating that the transformed population density may account for a surprising amount of the variance in Log (Covid-19 Cases).
 
 ```{r covid-density-scatter, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Scatterplot of Model 1", fig.height=3}
 ggplot(Model_Data, aes(y=case.log, x=population.density.log)) + 
@@ -374,19 +389,19 @@ ggplot(Model_Data, aes(y=case.log, x=population.density.log)) +
 
 ## Model 2
 
-For our second model, we find evidence that there is a relationship between how long the business mask mandats was in place (Business mask Mandate), how long the stay at home order was in place (Stay at home/shelter in place order), and how long the interstate travel quarantine was in place (Interstate Travel Quarantine In Place Length) in addition to the Log (Population Density). The coefficient for Log (Population Density) decreases from 0.358 to 0.329 (but remains significant), indicating that some of its explanatory power is shared between the other variables we have included (and also perhaps there is a small amount of colinearity between this variable and one or more of the others).
+For our second model, we find evidence that there is a relationship between our dependent varialbe and how long the business face mask mandate was in place (Business mask Mandate), how long the stay at home order was in place (Stay at home/shelter in place order), and how long the interstate travel quarantine was in place (Interstate Travel Quarantine In Place Length) in addition to variable Log (Population Density). The coefficient for Log (Population Density) decreases slightly from 0.358 to 0.329 but remains significant, indicating that some of its explanatory power is shared between the other variables we have included (and also perhaps there is a small amount of colinearity between this variable and one or more of the others).
 
-When we inspect the Stay at home/shelter in place order coefficient, we see that it is both significant and negative This indicates that for every extra day that a state spend with a Stay at home/sheter in place order in effect if all else is held equal, we expect to see a `r round(model2$coefficients['stay.home.total'] * -1 *  100,3)`% *decrease* in Covid-19 cases. This is a very large number, and because it has a small p-value we are sure that there is a relationship. This speaks strongly to the efficacy of such orders, and the low p-value (`r round(coeftest(model2, vcov=cov2)[4,4],3)`) gives us reason to believe that there is a relatively low probability this relationship exists by chance.
+When we inspect the Stay at home/shelter in place order coefficient, we see that it is both significant and negative. This indicates that for every extra day that a state has a Stay at home/sheter in place order in effect (if all else is held equal), we expect to see a `r round(model2$coefficients['stay.home.total'] * -1 *  100,3)`% *decrease* in Covid-19 cases. This is a very large number, and because it has a small p-value we are sure that a relationship exists. This speaks strongly to the efficacy of such orders, and the low p-value of `r round(coeftest(model2, vcov=cov2)[4,4],3)` gives us reason to believe that there is a relatively low probability this relationship exists by chance.
 
 Inspection of the Interstate Travel Quarantine In Place Length leads to a similar result. We see that the p-value is low enough (`r round(coeftest(model2, vcov=cov2)[5,4],3)`) that we should reject the idea that restricting travel does not affect Covid-19 cases. The effect size (1 more day of restricting interstate travel leads to `r round(model2$coefficients['travel.total'] * -100,3)`% decrease in Covid-19 cases, all else held equal) is nearly as large as the Stay at home/shelter in place order, meaning that they have relatively similar effects on Covid-19 cases.
 
-When we inspect the Business mask mandate variable, we find something surprising: it is significant, however it is also positive. This is counterintuitive: we would expect that the longer a mandate for business masks is in place, the lower the number of cases. One explanation for this might be reverse causality. Although we assumed that Business mask mandate influenced Log (Covid-19 Cases), it is possible that Log (Covid-19 Cases) also influenced Business mask mandate. For example, as the number of Covid-19 cases increased, states instituted or extended their business mask mandates as a result/in reaction to rising cases. This would explain why, according to our model, every 1 days of increased business mask mandate is associated with a `r round(model2$coefficients['maskB.total'] * 100,3)`% increase in Covid-19 cases per 100,000 residents.
+When we inspect the Business mask mandate variable, we find something surprising: it is significant, however it is also positive. This is counterintuitive: we would expect that the longer a mandate for business masks is in place, the lower the number of cases. One explanation for this might be reverse causality. Although we assumed that Business mask mandate influenced Log (Covid-19 Cases), it is possible that Log (Covid-19 Cases) also influenced Business mask mandate. For example, as the number of Covid-19 cases increased, states instituted or extended their business mask mandates as a result/in reaction to rising cases. This would explain why, according to our model, every 1 days of increased business mask mandate is associated with a `r round(model2$coefficients['maskB.total'] * 100,3)`% increase in Covid-19 cases per 100,000 residents. As will be further explained within the `Omitted Variables` section, we believe this may also be attributed to an omitted variable bias.
 
 A one-way analysis of variance (ANOVA) test reveals that the addition of these three variables to the base model results in a statistically significant benefit.
 
 ## Model 3
 
-For our last model, we add many extra variables. However, none of the additional variables were significant, and the Adjusted $R^2$ actually decreased (from 0.550 to 0.525) compared to the second model, indicating that this model is not efficient. We also seem some interesting effects on the variables that were already in model 2. Stay at home/shelter in place order and Interstate Travel Quarantine In Place Length actually are no longer significant. This might indicate that there exist one or more linear relationships between these two variables and the new variables added. Business mask mandate remains significant. Log (Population Density) retains its significance (alluding to a very strong relationship). Overall this model does not seem to provide much useful information compared to the previous, simpler models.
+For our last model, we added an additional four extra variables. However, we found that none of the additional variables were statistically significant and that the Adjusted $R^2$ actually decreased (from 0.550 to 0.525) compared to the second model, indicating that this model is not efficient. We also see some interesting effects on the variables that were already in model 2. Stay at home/shelter in place order and Interstate Travel Quarantine In Place Length actually are no longer significant. This might indicate that there exists one or more colinear relationships between these two variables and the new variables added. Business mask mandate remains significant and Log (Population Density) retains its significance (alluding to a very strong relationship). Overall this model does not seem to provide much useful information compared to the previous, simpler models.
 
 A one-way analysis of variance (ANOVA) test reveals that the addition of these four variables to the medium complexity model does not result in a statistically significant benefit.
 
@@ -402,7 +417,9 @@ For each model we will evaluate the assumptions for a Classical Liner Model. The
 
 ## Independent and identically distributed data
 
-The data use in our models represents the number of Covid-19 cases and state level policy decisions for all 50 states of the United States and the District of Columbia. While we can assume the data from each state/district is identically distributed, there may be some difficulty making an argument that the data is independent. There is an argument to be made that the Covid-19 cases in one state may effect an adjacent state. Additionally the policies of one state, a collection of states, or the federal government may have an influencing effect of a state's policy. This lack of independence may explain the skew to the shutdown data. Large populated states such as California and New York began to shut businesses down early and many other smaller states followed suit shortly afterwards.
+The data used in our models represents the number of Covid-19 cases and state level policy decisions for all 50 states of the United States along with the District of Columbia. We can assume the data sampled from each state/district is identically distributed and independent from one another. 
+
+We do acknowledge some concern may exist as to the true independence of each state in that the Covid-19 cases in one state may effect an adjacent state. Additionally the policies of one state, a collection of states, or the federal government may have an influencing effect of a state's policy. This lack of independence may explain the skew to the shutdown data. Large populated states such as California and New York began to shut businesses down early and many other smaller states followed suit shortly afterwards. 
 
 ## Linear Conditional Expectation Exists
 
@@ -520,35 +537,35 @@ Additionally, our variables capture the length of time a mandate was in place, b
 
 ## Omitted variable 1: Number of tourists
 
-The first omitted variable we consider is number of tourists. Through background knowledge, our expectation is that the greater the number of tourists the quicker the spread of COVID-19. On the other hand, many states do rely on tourism as their main source of income and therefore are more likely to relax interstate travel restrictions or quarantine policies. While we believe this variable may have an impact on our model, we did not have access to it as part of the two data sources mentioned in our `Introduction` section and thus have omitted it.\
+The first omitted variable we consider is number of tourists. Through background knowledge, our expectation is that the greater the number of tourists the quicker the spread of Covid-19. States with a greater number of tourists may also be more inclined to have a interstate travel quarantine in place for a longer period of time in order to help contain the spread of Covid-19. While we believe this variable may have an impact on our model, we did not have access to it as part of the two data sources mentioned in our `Introduction` section and thus have omitted it.
 
-We believe there would be a negative correlation between the number of tourists and our variable `Interstate Travel Quarantine in Place Length`. As mentioned above, we believe the greater the number of tourists a state has the more likely it is to rely on tourism income and the greater the likelihood of states shortening the number of days their interstate travel quarantine would be in place. Additionally, we believe the number of tourists would have a positive effect on the model output as a larger number of tourists increases the likelihood of a quicker spread of COVID-19. Since the coefficient for our variable `Interstate Travel Quarantine in Place Length` is negative, we believe the direction of the bias is away from zero.\
+We believe there would be a positive correlation between the number of tourists and our variable `Interstate Travel Quarantine in Place Length`. As mentioned above, we believe the greater the number of tourists a state has the longer it would have an interstate travel quarantine in place. Additionally, we believe the number of tourists would have a positive effect on the model output as a larger number of tourists increases the likelihood of a quicker spread of COVID-19. Since the coefficient for our variable `Interstate Travel Quarantine in Place Length` is negative, we believe the direction of the bias is towards zero.
 
 ### Omitted variable 2: Number of essential businesses
 
-The second omitted variable we consider are the number of essential businesses within a state. Essential businesses are exempt from statewide stay at home or shelter in place orders and can opt to still have their employees come into offices. Therefore, we believe states with a greater number of essential businesses have a greater potential of a lengthier business face mask mandate. Additionally, due to the fact that there would be a greater number of people who would be unable to stay at home, we expect everyone else who can would be expected to stay at home for a longer period of time. We did not have access to this data as part of the two data sources mentioned in our `Introduction` section and thus have omitted it from our model.\
+The second omitted variable we consider are the number of essential businesses within a state. Essential businesses are exempt from statewide stay at home or shelter in place orders and can opt to still have their employees come into offices. Therefore, we believe states with a greater number of essential businesses have a greater potential of a lengthier business face mask mandate. Additionally, due to the fact that there would be a greater number of people who would be unable to stay at home, we expect everyone else who can would be expected to stay at home for a longer period of time. We did not have access to this data as part of the two data sources mentioned in our `Introduction` section and thus have omitted it from our model.
 
-We believe there would be a positive correlation between the number of essential businesses and our variable `Business mask mandates` due to our previous reasoning. Additionally, we believe the number of essential businesses would have a positive effect on the model output as a larger number of essential businesses mean a larger number of the population who cannot stay at or work from home. Since the coefficient of our variable `Business mask mandates` is positive, we believe the direction of the bias is away from zero.\
+We believe there would be a positive correlation between the number of essential businesses and our variable `Business mask mandates` due to our previous reasoning. Additionally, we believe the number of essential businesses would have a positive effect on the model output as a larger number of essential businesses mean a larger number of the population who cannot stay at or work from home. Since the coefficient of our variable `Business mask mandates` is positive, we believe the direction of the bias is away from zero.
 
-We believe there would also be a positive correlation between the number of essential businesses and our variable `Stay at home/shelter in place order` due to our reasoning above. As mentioned earlier, we also believe that the number of essential businesses would have a positive effect on the model output. Therefore, since the coefficient of our variable `Stay at home/shelter in place order` is negative, we believe the direction of the bias is towards zero.\
+We believe there would also be a positive correlation between the number of essential businesses and our variable `Stay at home/shelter in place order` due to our reasoning above. As mentioned earlier, we also believe that the number of essential businesses would have a positive effect on the model output. Therefore, since the coefficient of our variable `Stay at home/shelter in place order` is negative, we believe the direction of the bias is towards zero.
 
 ## Omitted variable 3: Amount of public sanitation stations
 
-Another omitted variable of interest is the amount of public sanitation stations that exist within a state. One of the recommended ways to prevent the spread of COVID-19 is through sanitizing which could be greatly improved through a greater amount of public sanitation stations. We would additionally expect there to be a greater number of public sanitation stations with a more densely populated state.\
+Another omitted variable of interest is the amount of public sanitation stations that exist within a state. One of the recommended ways to prevent the spread of COVID-19 is through sanitizing which could be greatly improved through a greater amount of public sanitation stations. We would additionally expect there to be a greater number of public sanitation stations with a more densely populated state.
 
-We believe there would be a positive correlation between the amount of public sanitation stations and our variable `Log(Population Density)` due to our reasoning above. Additionally, we believe the amount of public sanitation stations would have a negative effect on the model output as we believe increased sanitation decreases the rate at which COVID-19 spreads. Therefore, since the coefficient of variable `Log(Population Density)` is positive, we believe the direction of the bias is towards zero.\
+We believe there would be a positive correlation between the amount of public sanitation stations and our variable `Log(Population Density)` due to our reasoning above. Additionally, we believe the amount of public sanitation stations would have a negative effect on the model output as we believe increased sanitation decreases the rate at which COVID-19 spreads. Therefore, since the coefficient of variable `Log(Population Density)` is positive, we believe the direction of the bias is towards zero.
 
 ## Omitted variable 4: Days with cold or freezing temperatures
 
-Our fourth omitted variable we consider are the number of days with cold or freezing temperatures. We believe this omitted variable may have an effect on the bias of the stay at home length. From prior knowledge, we believe that people are more likely to obey the stay at home order on days with cold or freezing temperatures and are more likely to leave their homes on days with warm temperatures. Therefore, we would expect state officials to be more likely to implement or extend stay at home or shelter in place orders should they expect cold or freezing days (for example, a blizzard on a day).\
+Our fourth omitted variable we consider are the number of days with cold or freezing temperatures. We believe this omitted variable may have an effect on the bias of the stay at home length. From prior knowledge, we believe that people are more likely to obey the stay at home order on days with cold or freezing temperatures and are more likely to leave their homes on days with warm temperatures. Therefore, we would expect state officials to be more likely to implement or extend stay at home or shelter in place orders should they expect cold or freezing days (for example, a blizzard on a day).
 
-We believe there would be a positive correlation between the number of days with cold or freezing temperatures and our `Stay at home/shelter in place order` variable due to the reasoning mentioned above. Additionally, days with cold or freezing temperatures would force more people to stay indoors and therefore we believe this omitted variable would have a positive effect on the model itself. Since the coefficient of our `Stay at home/shelter in place order` variable is negative, we believe the direction of our bias is towards zero.\
+We believe there would be a positive correlation between the number of days with cold or freezing temperatures and our `Stay at home/shelter in place order` variable due to the reasoning mentioned above. Additionally, days with cold or freezing temperatures would force more people to stay indoors and therefore we believe this omitted variable would have a positive effect on the model itself. Since the coefficient of our `Stay at home/shelter in place order` variable is negative, we believe the direction of our bias is towards zero.
 
 ## Omitted variable 5: Number of schools shut down
 
-The final omitted variable we consider are the number of schools shut down. From prior knowledge we know that some schools partially shut down, some completely shut down and went virtual, and some went on a hybrid model where students came in for a partial week. Therefore, though we recognize that we could retrieve the number of schools within a state we chose to omit this variable due to us not being able to confirm the true number of schools fully shut down.\
+The final omitted variable we consider are the number of schools shut down. From prior knowledge we know that some schools partially shut down, some completely shut down and went virtual, and some went on a hybrid model where students came in for a partial week. Therefore, though we recognize that we could retrieve the number of schools within a state we chose to omit this variable due to us not being able to confirm the true number of schools fully shut down.
 
-We believe there would be a positive correlation between the number of schools shut down to our variable `Log(Population Density)`. Additionally, we believe this omitted variable would have a negative coefficient within our model. Therefore, we believe the direction of the bias is towards zero.\
+We believe there would be a positive correlation between the number of schools shut down to our variable `Log(Population Density)`. Additionally, we believe this omitted variable would have a negative coefficient within our model. Therefore, we believe the direction of the bias is towards zero.
 
 # Conclusion
 
