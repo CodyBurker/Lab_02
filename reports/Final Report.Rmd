@@ -39,7 +39,15 @@ There has been increased skepticism on the true effectiveness of restrictions in
 
 From this, we are focusing on the following main research question: `Which Covid-19 policies implemented by states have an effect on the statewide initial spread of Covid-19?`
 
-As part of our research we will specifically be looking at the following policies implemented by various states: 1. Stay at home/shelter in place order length 2. Face mask mandate specifically for businesses length 3. Interstate travel quarantine length 4. Restaurant shutdown length 5. Gyms shutdown length 6. Bars shutdown length 7. Declaration of a state of emergency
+As part of our research we will specifically be looking at the following policies implemented by various states:
+
+1. Stay at home/shelter in place order length 
+2. Face mask mandate specifically for businesses length 
+3. Interstate travel quarantine length 
+4. Restaurant shutdown length 
+5. Gyms shutdown length 
+6. Bars shutdown length 
+7. Declaration of a state of emergency
 
 Understanding the nature of Covid-19 as being a highly infectious disease, we believe the first few months are the most crucial times in controlling an outbreak. Thus, we define an `initial spread of Covid-19` to be the number of cases at 05/31/2020. We believe this reflects the initial rise of cases from $0$ to $x$ within the first few crucial months of the pandemic.
 
