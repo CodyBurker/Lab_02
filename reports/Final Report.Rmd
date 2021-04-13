@@ -256,7 +256,7 @@ input_3<-ggplot(Model_Data, aes(x=stay.home.total)) +
    ylab('Frequency')+xlab(paste('Stay at Home/Shelter in Place Order','\n','(Days in Place)'))
 input_4<-ggplot(Model_Data, aes(x=travel.total)) + 
    geom_histogram(color="black", fill="grey")+
-   ylab('Frequency')+xlab('Interstate Travel Quarantine (Days in Place)')
+   ylab('Frequency')+xlab(paste('Interstate Travel Quarantine','\n','(Days in Place)'))
 grid.arrange(input_1,input_2,input_3,input_4, nrow=2) 
 ```
 
