@@ -398,7 +398,7 @@ When we inspect the Stay at home/shelter in place order coefficient, we see that
 
 Inspection of the Interstate Travel Quarantine In Place Length leads to a similar result. We see that the p-value is low enough (`r round(coeftest(model2, vcov=cov2)[5,4],3)`) that we should reject the idea that restricting travel does not affect Covid-19 cases. The effect size (1 more day of restricting interstate travel leads to `r round(model2$coefficients['travel.total'] * -100,3)`% decrease in Covid-19 cases, all else held equal) is nearly as large as the Stay at home/shelter in place order, meaning that they have relatively similar effects on Covid-19 cases.
 
-When we inspect the Business mask mandate variable, we find something surprising: it is significant, however it is also positive. This is counterintuitive: we would expect that the longer a mandate for business masks is in place, the lower the number of cases. One explanation for this might be reverse causality. Although we assumed that Business mask mandate influenced Log (Covid-19 Cases), it is possible that Log (Covid-19 Cases) also influenced Business mask mandate. For example, as the number of Covid-19 cases increased, states instituted or extended their business mask mandates as a result/in reaction to rising cases. This would explain why, according to our model, every 1 days of increased business mask mandate is associated with a `r round(model2$coefficients['maskB.total'] * 100,3)`% increase in Covid-19 cases per 100,000 residents. As will be further explained within the `Omitted Variables` section, we believe this may also be attributed to an omitted variable bias.
+When we inspect the Business mask mandate variable, we find something surprising: it is significant, however it is also positive. This is counterintuitive: we would expect that the longer a mandate for business masks is in place, the lower the number of cases. One explanation for this might be reverse causality. Although we assumed that Business mask mandate influenced Log (Covid-19 Cases), it is possible that Log (Covid-19 Cases) also influenced Business mask mandate. For example, as the number of Covid-19 cases increased, states instituted or extended their business mask mandates as a result/in reaction to rising cases. This would explain why, according to our model, every 1 days of increased business mask mandate is associated with a `r round(model2$coefficients['maskB.total'] * 100,3)`% increase in Covid-19 cases per 100,000 residents. As will be further explained within the `Discussion of Omitted Variables` section, we believe this may also be attributed to an omitted variable bias.
 
 A one-way analysis of variance (ANOVA) test reveals that the addition of these three variables to the base model results in a statistically significant benefit.
 
@@ -422,7 +422,7 @@ For each model we will evaluate the assumptions for a Classical Liner Model. The
 
 The data used in our models represents the number of Covid-19 cases and state level policy decisions for all 50 states of the United States along with the District of Columbia. We can assume the data sampled from each state/district is identically distributed and independent from one another.
 
-We do acknowledge some concern may exist as to the true independence of each state in that the Covid-19 cases in one state may effect an adjacent state. Additionally the policies of one state, a collection of states, or the federal government may have an influencing effect of a state's policy. This lack of independence may explain the skew to the shutdown data. Large populated states such as California and New York began to shut businesses down early and many other smaller states followed suit shortly afterwards. That being said, the sampling of one state does not directly affect the sample of another state. Therefor, we conclude that the data used in this analysis is independent and identically distributed.
+We do acknowledge some concern may exist as to the true independence of each state in that the Covid-19 cases in one state may effect an adjacent state. Additionally the policies of one state, a collection of states, or the federal government may have an influencing effect of a state's policy. This lack of true independence may explain the skew to the shutdown data. Large populated states such as California and New York began to shut businesses down early and many other smaller states followed suit shortly afterwards. That being said, the sampling of one state does not directly affect the sample of another state. Therefore, we conclude that the data used in this analysis is independent and identically distributed.
 
 ## Linear Conditional Expectation Exists
 
@@ -432,7 +432,7 @@ To evaluate if the relationship between our input and output variables is indeed
 Model_Data <- Model_Data %>%  mutate(model1_res = resid(model1))
 Model_Data <- Model_Data %>% mutate(model1_prd = predict(model1)) 
 
-#Residuals versus Predictors
+#Residuals versus Predicted Values
 Residuals_Plot1 = ggplot(data = Model_Data, aes(x = model1_prd, y = model1_res)) + 
   geom_point() + stat_smooth(se = TRUE)+
   ylab('Base Model Residuals')+xlab('Predicted Values')
@@ -441,7 +441,7 @@ Residuals_Plot1 = ggplot(data = Model_Data, aes(x = model1_prd, y = model1_res))
 Model_Data <- Model_Data %>%  mutate(model2_res = resid(model2))
 Model_Data <- Model_Data %>% mutate(model2_prd = predict(model2)) 
 
-#Residuals versus Predictors
+#Residuals versus Predicted Values
 Residuals_Plot2 = ggplot(data = Model_Data, aes(x = model2_prd, y = model2_res)) + 
   geom_point() + stat_smooth(se = TRUE)+
   ylab('Medium Model Residuals')+xlab('Predicted Values')
@@ -450,7 +450,7 @@ Residuals_Plot2 = ggplot(data = Model_Data, aes(x = model2_prd, y = model2_res))
 Model_Data <- Model_Data %>%  mutate(model3_res = resid(model3))
 Model_Data <- Model_Data %>% mutate(model3_prd = predict(model3)) 
 
-#Residuals versus Predictors
+#Residuals versus Predicted Values
 Residuals_Plot3 = ggplot(data = Model_Data, aes(x = model3_prd, y = model3_res)) + 
   geom_point() + stat_smooth(se = TRUE)+
   ylab('Complex Model Residuals')+xlab('Predicted Values')
@@ -459,33 +459,33 @@ Residuals_Plot3 = ggplot(data = Model_Data, aes(x = model3_prd, y = model3_res))
 grid.arrange(Residuals_Plot1,Residuals_Plot2,Residuals_Plot3,nrow=2) 
 ```
 
-From the Residual/Predictors plot shown in Figure \@ref(fig:residualsplot), one can see that this basic model's predictors has a fairly linear relationship with residuals implying that a Linear Conditional Expectation exists for all models.
+From the Residual/Predicted Values plot shown in Figure \@ref(fig:residualsplot), one can see that the base model's predicted values have a fairly linear relationship with residuals implying that a Linear Conditional Expectation exists for all models.
 
 ## Perfect Collinearity
 
-Our base model cannot possibly have perfect colinearity because it only has one input variable. We evaluated multicollinearity using variance inflation factors for our medium complexity model and complex model. Our medium complexity model's variance inflation factors are particularly small (less than 2) and imply that there is no concern for multicollinearity. However our complex model's variance inflation factors are quite large (several of the Shut Down variables are between 5-9). This implies that there may be multicollinearity. This judgment is subjective. If after reviewing the model coefficients we believe that this potential multicollinearity creates confusion in the model, the solution would be to limit our input variables to one variable to that we believe is representative of all the shut down inputs (for example, the model could include only the restaurant shutdowns instead of restaurant, bar, and gym shutdowns).
+Our base model cannot possibly have perfect collinearity because it only has one input variable. We evaluated multicollinearity using variance inflation factors for our medium complexity model and complex model. Our medium complexity model's variance inflation factors are particularly small (less than 2) and imply that there is no concern for multicollinearity. However our complex model's variance inflation factors are quite large (between 5 and 9 for several of our variables). This implies that there may be multicollinearity, though the judgment of its true existence is subjective. If after reviewing the model coefficients we believe that this potential multicollinearity creates confusion in the model, we could limit our input variables to one variable that we believe is representative of all the shut down inputs (for example, the model could include only the restaurant shutdowns instead of restaurant, bar, and gym shutdowns).
 
 ## Homoskedastic Error
 
-To evaluate the presence of heteroskedastic errors, we will plot the residuals in relationship to the model's independent variables. For our base model, we will plot the base model residuals versus the log transformation of each state's population density. This is shown in Figure \@ref(fig:homoskedastic).
+To evaluate the presence of heteroskedastic errors, we plotted our model's residuals against its independent variables. For our base model, we plotted the base model residuals against the log transformation of each state's population density. This is shown in Figure \@ref(fig:homoskedastic).
 
-```{r homoskedastic, echo=FALSE, message=FALSE, warning=FALSE, fig.height=3, fig.cap="Homoskedastic Error of Model 2"}
+```{r homoskedastic, echo=FALSE, message=FALSE, warning=FALSE, fig.height=3, fig.cap="Homoskedasticity Plot for Base Model"}
 Homoskedastic_Plot = ggplot(data = Model_Data, aes(x = population.density.log, y = model2_res)) + 
   geom_point() + stat_smooth(se = TRUE)+
   ylab('Residuals')+xlab("Log(Population Density)")
 Homoskedastic_Plot
 ```
 
-The Residual/Input plot displays a flaring of the standard error at the extremes which implies the potential for heteroskedastic errors.
+The Residuals/Input plot displays a flaring of the standard error at the extremes which implies the potential for heteroskedastic errors.
 
-For our medium complexity model, we will plot the residuals in relationship to the model's four dependent variables. We will plot the base model residuals versus:
+For our medium complexity model, we plotted the residuals against the model's four dependent variables:
 
 -   the log transformation of each state's population density
 -   Business mask mandate (days in place)
 -   Stay at home/shelter in place order (days in place)
 -   Interstate travel quarantine (days in place)
 
-```{r hokmoskedasticmedium, echo=FALSE, fig.cap="Homoskedastic Plots for Medium Complex Model", fig.height=3, message=FALSE, warning=FALSE}
+```{r hokmoskedasticmedium, echo=FALSE, fig.cap="Homoskedasticity Plots for Medium Complex Model", fig.height=3, message=FALSE, warning=FALSE}
 Homoskedastic_Plot1 = ggplot(data = Model_Data, aes(x = population.density.log, y = model2_res)) + 
   geom_point() + stat_smooth(se = TRUE)+
   ylab('Residuals')+xlab('Log (Population Density)')
@@ -501,13 +501,13 @@ Homoskedastic_Plot4 = ggplot(data = Model_Data, aes(x = travel.total, y = model2
 grid.arrange(Homoskedastic_Plot1,Homoskedastic_Plot2,Homoskedastic_Plot3,Homoskedastic_Plot4,nrow=2) 
 ```
 
-The Residual/Input plot for the log of the population density still displays a flaring of the standard error of the residuals at the extremes, as shown in Figure \@ref(fig:hokmoskedasticmedium). The business mask mandate and interstate travel quarantine also display inconsistent standard errors. These factors suggest the potential for heteroskedastic errors. To mitigate this, we will use robust standard error when reviewing the significance level of medium complexity model's coefficients.
+The Residuals/Input plot for the log of the population density again displays a flaring of the standard error of the residuals at the extremes, as shown in Figure \@ref(fig:hokmoskedasticmedium). The business mask mandate and interstate travel quarantine also display inconsistent standard errors. These factors suggest the potential for heteroskedastic errors. To mitigate this, we will use robust standard error when reviewing the significance level of the medium complexity model's coefficients.
 
-The log transformation of each state's population density also affects the complex model (suggesting heteroskedastic error), therefore we will use robust standard error when reviewing the significance level of all model's coefficients.
+The log transformation of each state's population density also affects the complex model (suggesting the existence of heteroskedastic errors within the complex model), therefore we will use robust standard error when reviewing the significance level of all model's coefficients.
 
 ## Normal Residuals
 
-Lastly we have a histogram of each model's residuals to ensure they are normal. As you can see from the Figure \@ref(fig:residshist), the residuals are in fact normally distributed for all models.
+To assess our models against the last CLM assumption, we have histograms of each model's residuals to ensure they are normal. As you can see from Figure \@ref(fig:residshist), the residuals are in fact normally distributed for all models.
 
 ```{r residshist, echo=FALSE, message=FALSE, warning=FALSE, fig.cap="Distribution of Residuals of All 3 Models", fig.height=3}
 #Histogram of Residuals
@@ -530,7 +530,7 @@ Normal_Residuals3<-ggplot(Model_Data, aes(x=model3_res)) +
 
 Finally it is important to note that our analysis has collapsed this time series data to merely look at one point in time. We have attempted to include variables that are measured in length of days in order to account for the importance of time on this analysis, but this does not counteract the fact that this analysis would be improved by looking at the timing of these policies being implemented.
 
-Additionally, our variables capture the length of time a mandate was in place, but not necessarily how effectively the mandate was enforced. For example, it is possible a state implemented an interstate travel quarantine but did not have the required infrastructure to enforce it. This means that we may not be capturing the effects of an interstate travel quarantine, but instead the effect of a state declaring an interstate travel quarantine.
+Additionally, our variables capture the length of time a mandate was in place, but not how effectively the mandate was enforced. For example, it is possible a state implemented an interstate travel quarantine but did not have the required infrastructure to enforce it. This means that we may not be capturing the full effects of an interstate travel quarantine, but instead the effect of a state declaring an interstate travel quarantine.
 
 # Discussion of Omitted Variables
 
@@ -538,7 +538,7 @@ Additionally, our variables capture the length of time a mandate was in place, b
 
 The first omitted variable we consider is number of tourists. Through background knowledge, our expectation is that the greater the number of tourists the quicker the spread of Covid-19. States with a greater number of tourists may also be more inclined to have a interstate travel quarantine in place for a longer period of time in order to help contain the spread of Covid-19. While we believe this variable may have an impact on our model, we did not have access to it as part of the two data sources mentioned in our `Introduction` section and thus have omitted it.
 
-We believe there would be a positive correlation between the number of tourists and our variable `Interstate Travel Quarantine in Place Length`. As mentioned above, we believe the greater the number of tourists a state has the longer it would have an interstate travel quarantine in place. Additionally, we believe the number of tourists would have a positive effect on the model output as a larger number of tourists increases the likelihood of a quicker spread of COVID-19. Since the coefficient for our variable `Interstate Travel Quarantine in Place Length` is negative, we believe the direction of the bias is towards zero.
+We believe there would be a positive correlation between the number of tourists and our variable `Interstate Travel Quarantine in Place Length`. As mentioned above, we believe the greater the number of tourists a state has the longer it would have an interstate travel quarantine in place. Additionally, we believe the number of tourists would have a positive effect on the model output as a larger number of tourists increases the likelihood of a quicker spread of Covid-19. Since the coefficient for our variable `Interstate Travel Quarantine in Place Length` is negative, we believe the direction of the bias is towards zero.
 
 ### Omitted variable 2: Number of essential businesses
 
@@ -550,9 +550,9 @@ We believe there would also be a positive correlation between the number of esse
 
 ## Omitted variable 3: Amount of public sanitation stations
 
-Another omitted variable of interest is the amount of public sanitation stations that exist within a state. One of the recommended ways to prevent the spread of COVID-19 is through sanitizing which could be greatly improved through a greater amount of public sanitation stations. We would additionally expect there to be a greater number of public sanitation stations with a more densely populated state.
+Another omitted variable of interest is the amount of public sanitation stations that exist within a state. One of the recommended ways to prevent the spread of Covid-19 is through sanitizing which could be greatly improved through a greater amount of public sanitation stations. We would additionally expect there to be a greater number of public sanitation stations with a more densely populated state.
 
-We believe there would be a positive correlation between the amount of public sanitation stations and our variable `Log(Population Density)` due to our reasoning above. Additionally, we believe the amount of public sanitation stations would have a negative effect on the model output as we believe increased sanitation decreases the rate at which COVID-19 spreads. Therefore, since the coefficient of variable `Log(Population Density)` is positive, we believe the direction of the bias is towards zero.
+We believe there would be a positive correlation between the amount of public sanitation stations and our variable `Log(Population Density)` due to our reasoning above. Additionally, we believe the amount of public sanitation stations would have a negative effect on the model output as we believe increased sanitation decreases the rate at which Covid-19 spreads. Therefore, since the coefficient of variable `Log(Population Density)` is positive, we believe the direction of the bias is towards zero.
 
 ## Omitted variable 4: Days with cold or freezing temperatures
 
